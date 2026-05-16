@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Pro BARF Kalkulátor & Asszisztens</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --bg-color: #0f172a;       
+    --card-bg: rgba(30, 41, 59, 0.7); 
+    --card-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #f59e0b;         
+    --success: #10b981;
+    --info: #3b82f6;
+    --danger: #ef4444;
+    --input-bg: rgba(15, 23, 42, 0.6);
+  }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-color);
+    background-image: radial-gradient(circle at top right, #1e293b, transparent), radial-gradient(circle at bottom left, #0f172a, transparent);
+    color: var(--text-main);
+    padding: 20px 10px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container { max-width: 1450px; margin: 0 auto; width: 100%; }
+
+  h1 {
+    text-align: center; font-size: 26px; font-weight: 900;
+    background: -webkit-linear-gradient(45deg, #f59e0b, #fbbf24);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 20px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  /* --- 3-OSZLOPOS APP ELRENDEZÉS --- */
+  .app-layout { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-start; }
+  .col-left { flex: 0 0 330px; display: flex; flex-direction: column; gap: 15px; }
+  .col-middle { flex: 1; min-width: 550px; display: flex; flex-direction: column; gap: 15px; }
+  .col-right { flex: 0 0 360px; display: flex; flex-direction: column; gap: 15px; }
+
+  @media (max-width: 1250px) { .col-right { flex: 1; min-width: 100%; display: grid; grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 950px) { .col-left { flex: 1; min-width: 100%; } .col-middle { min-width: 100%; } .col-right { grid-template-columns: 1fr; } }
+
+  /* --- KÁRTYÁK --- */
+  .card {
+    background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border); border-radius: 12px; padding: 15px;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); width: 100%;
+  }
+
+  .section-title {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800; 
+    margin-bottom: 12px; border-bottom: 1px solid var(--card-border); padding-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .badge { background: var(--accent); color: #fff; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+  label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+  
+  input[type="number"], input[type="text"], select {
+    width: 100%; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border);
+    border-radius: 8px; color: var(--text-main); font-size: 14px; outline: none; transition: 0.3s ease;
+  }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+  select option, select optgroup { background: var(--bg-color); color: var(--text-main); }
+  
+  .input-row { display: flex; gap: 10px; margin-top: 8px; }
+  .input-row .col { flex: 1; }
+
+  /* --- ALAPADATOK --- */
+  .profile-select { border-color: var(--accent); color: var(--accent); font-weight: bold; margin-bottom: 10px; }
+  .checkbox-group { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent); display: flex; align-items: center; gap: 10px; margin-top: 8px;}
+  .checkbox-group.fasting { border-left-color: var(--danger); }
+  .checkbox-group.fish { border-left-color: var(--info); }
+  .checkbox-group label { margin: 0; font-size: 12.5px; color: #fff; cursor: pointer; line-height: 1.4; width: 100%; }
+  input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+
+  /* --- CSÚSZKÁK --- */
+  .slider-group { background: rgba(0,0,0,0.15); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;}
+  .slider-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+  .slider-name { font-weight: 600; font-size: 12px; color: var(--text-main); line-height: 1.2; }
+  .slider-value { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 8px; font-size: 11px; font-weight: bold; color: var(--accent); white-space: nowrap; }
+  
+  input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #334155; border-radius: 5px; outline: none; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); transition: 0.2s; }
+  
+  .rost-group { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+  .rost-group .slider-name, .rost-group .slider-value { color: var(--success); }
+  .rost-group input[type="range"]::-webkit-slider-thumb { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+
+  /* --- HÚS KÁRTYÁK --- */
+  .meat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+  @media (max-width: 850px) { .meat-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .meat-grid { grid-template-columns: 1fr; } }
+
+  .meat-card { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+  .meat-title { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: var(--accent); margin-bottom: 10px;}
+  
+  .select-wrapper { display: flex; gap: 5px; align-items: center; }
+  .btn-del { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); padding: 0 10px; border-radius: 8px; cursor: pointer; display: none; font-size: 14px; transition: 0.2s; height: 100%;}
+  .btn-del:hover { background: #ef4444; color: #fff; }
+  
+  .custom-group { display: none; margin-top: 8px; gap: 8px; }
+  .btn-save { background: var(--success); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; white-space: nowrap;}
+
+  .meat-stats { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; }
+  .meat-stat-box { flex: 1; background: rgba(0,0,0,0.25); text-align: center; border-radius: 6px; padding: 6px 2px; border: 1px solid rgba(255,255,255,0.05); }
+  .meat-stat-val { font-size: 13px; font-weight: bold; color: var(--success); display: block; margin-top: 2px;}
+  .meat-stat-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
+
+  /* --- HETI NAPTÁR --- */
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .cal-day { background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 5px; text-align: center; }
+  .cal-day-title { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 6px; }
+  .cal-day-task { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  @media (max-width: 800px) { .calendar-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 500px) { .calendar-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* --- DINAMIKUS KIEGÉSZÍTŐK KÁRTYÁK --- */
+  .supp-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;}
+  .supp-card { background: rgba(15, 23, 42, 0.5); border-left: 3px solid var(--info); border-radius: 8px; padding: 12px; position: relative;}
+  .supp-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .supp-card-header span { font-size: 13px; font-weight: 800; color: #fff; }
+  .supp-desc { font-size: 11.5px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4; padding-right: 25px;}
+  
+  .supp-inputs { display: flex; gap: 8px; margin-bottom: 10px; }
+  .supp-inputs label { font-size: 10px; margin-bottom: 2px;}
+  .supp-inputs input { padding: 6px; font-size: 13px; text-align: center;}
+  
+  .supp-stats { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; font-size: 11.5px; color: var(--success); font-weight: bold; }
+  .supp-del-btn { position: absolute; right: 10px; top: 10px; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.5); color: #ef4444; border-radius: 6px; cursor: pointer; font-size: 12px; padding: 3px 6px; transition: 0.2s;}
+  .supp-del-btn:hover { background: #ef4444; color: #fff; }
+
+  /* --- VÁSÁRLÓLISTA ÉS FŐ ÖSSZESÍTŐ --- */
+  .sl-container { background: rgba(0,0,0,0.15); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; }
+  .sl-item { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-main); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .sl-item b { color: var(--success); }
+  .sl-item-supp { color: var(--info); font-size: 12px; }
+  .btn-copy { width: 100%; background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+  
+  .summary-card { text-align: center; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05); }
+  .total-main { font-size: 28px; font-weight: 900; color: var(--success); margin: 5px 0; }
+  .total-sub { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+  .error-state { border-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+  .error-state .total-main { color: var(--danger); }
+  .warning-text { color: var(--danger); font-size: 12px; font-weight: bold; margin-top: 5px; display: none; }
+
+  @media (max-width: 768px) { input[type="number"], input[type="text"], select { font-size: 16px; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Szakmai BARF Asszisztens</h1>
+
+  <div class="app-layout">
+    
+    <!-- ==================== BAL OSZLOP (Alapadatok) ==================== -->
+    <div class="col-left">
+      
+      <div class="card">
+        <div class="section-title">Kutya Fajta és Profilja</div>
+        <select id="dogProfile" class="profile-select" onchange="applyProfile()">
+          <option value="custom">⚙️ Egyéni százalék megadása...</option>
+          <optgroup label="Felnőtt Kutyák">
+            <option value="2.0" selected>🐕 Felnőtt, Közepes/Nagytestű (Átlagos 2%)</option>
+            <option value="3.0">🐕 Felnőtt, Kistestű fajta (Gyors anyagcsere 3%)</option>
+            <option value="3.5">🏃 Felnőtt, Sport / Munkakutya (3.5 - 4%)</option>
+            <option value="1.5">🦥 Felnőtt, Idős / Ivartalanított hízékony (1.5%)</option>
+          </optgroup>
+          <optgroup label="Kölykök és Növendékek">
+            <option value="6.0">🍼 Kölyök (2-6 hó) - Nagytestű (Lassú növ. 6%)</option>
+            <option value="8.0">🍼 Kölyök (2-6 hó) - Kistestű (Gyors 8%)</option>
+            <option value="4.0">🐶 Növendék (6-12 hónapos) (4%)</option>
+          </optgroup>
+        </select>
+
+        <div class="input-row">
+          <div class="col"><label>Testsúly (kg)</label><input type="number" id="dogWeight" value="26.4" step="0.1" oninput="autoFillGrams()"></div>
+          <div class="col"><label>Napi adag (%)</label><input type="number" id="dogPercent" value="2.0" step="0.1" oninput="document.getElementById('dogProfile').value='custom'; autoFillGrams()"></div>
+        </div>
+
+        <div class="checkbox-group fasting">
+          <input type="checkbox" id="isFasting" onchange="updateResults()" checked>
+          <label for="isFasting"><b>Heti 1 koplalónapot tartunk.</b> <br><small>(Vásárlólista: 26 nap)</small></label>
+        </div>
+        
+        <div class="checkbox-group fish">
+          <input type="checkbox" id="isFishDay" onchange="updateCalendar()" checked>
+          <label for="isFishDay"><b>Heti 1 halas menü tartása.</b></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">BARF Arányok (Max 100%)</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-name">Csontos % <br><span style="color:var(--text-muted); font-size:10px; font-weight:normal;">(20% adja ki a 10% tiszta csontot)</span></span><span class="slider-value" id="val_p_csont">20%</span></div>
+          <input type="range" id="p_csont" value="20" min="0" max="100" step="1" oninput="handleSlider('p_csont')">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-name">Fő Menü / Hús %</span><span class="slider-value" id="val_p_menu">50%</span></div>
+          <input type="range" id="p_menu" value="50" min="0" max="100" step="1" oninput="handleSlider('p_menu')">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-name">Tiszta Izomhús %</span><span class="slider-value" id="val_p_hus">20%</span></div>
+          <input type="range" id="p_hus" value="20" min="0" max="100" step="1" oninput="handleSlider('p_hus')">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-name">Máj %</span><span class="slider-value" id="val_p_maj">5%</span></div>
+          <input type="range" id="p_maj" value="5" min="0" max="100" step="1" oninput="handleSlider('p_maj')">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-name">Egyéb Belsőség %</span><span class="slider-value" id="val_p_bels">5%</span></div>
+          <input type="range" id="p_bels" value="5" min="0" max="100" step="1" oninput="handleSlider('p_bels')">
+        </div>
+        <div class="slider-group rost-group">
+          <div class="slider-header"><span class="slider-name">🥒 Rost / Zöldség %</span><span class="slider-value" id="val_p_rost">10%</span></div>
+          <input type="range" id="p_rost" value="10" min="0" max="30" step="1" oninput="handleRostSlider()">
+        </div>
+      </div>
+
+      <div class="card summary-card" id="totalSummaryCard">
+        <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: bold;">Tálba kerül (Hús/Belsőség/Csont)</div>
+        <div class="total-main" id="totalGramsMain">0 g</div>
+        <div class="total-sub" id="totalGramsSub">+ Rost kiegészítés: 0 g</div>
+        <div id="warningText" class="warning-text">⚠️ Állítsd a csúszkákat pontosan 100%-ra!</div>
+      </div>
+
+    </div>
+
+    <!-- ==================== KÖZÉPSŐ OSZLOP (Húsok, Naptár) ==================== -->
+    <div class="col-middle">
+      
+      <div class="meat-grid" id="meat-grid">
+        <!-- JS generálja a húsokat ide -->
+      </div>
+
+      <div class="card" style="margin-top: 15px;">
+        <div class="section-title">📅 Heti Etetési Naptár & Emlékeztető</div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+    </div>
+
+    <!-- ==================== JOBB OSZLOP (Kiegészítők, Vásárlólista) ==================== -->
+    <div class="col-right">
+      
+      <div class="card">
+        <div class="section-title">💊 Kiegészítők a Menühöz</div>
+        
+        <!-- Aktív Kiegészítők Ide Kerülnek -->
+        <div class="supp-list" id="active-supps-container"></div>
+        
+        <!-- Kiegészítő Hozzáadása Box -->
+        <div style="border-top: 1px dashed var(--card-border); padding-top: 15px;">
+          <label style="color:var(--accent); font-weight:bold; margin-bottom:8px;">➕ Kiegészítő Hozzáadása</label>
+          <div class="select-wrapper" style="margin-bottom: 10px;">
+            <select id="suppSelect" style="flex:1;" onchange="onSuppSelectChange()"></select>
+            <button id="btnDelCustomSupp" class="btn-del" onclick="deleteCustomSuppDef()" title="Törlés">🗑️</button>
+          </div>
+          <button id="btnAddPredefSupp" class="btn-save" style="width:100%;" onclick="addSelectedSupp()">Hozzáadás a menühöz</button>
+
+          <!-- Új Egyedi Kiegészítő Űrlap -->
+          <div id="newSuppInputs" style="display:none; margin-top:10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <label>Saját kiegészítő adatai:</label>
+            <input type="text" id="newSuppName" placeholder="Név (pl. Kurkuma)" style="margin-bottom:8px;">
+            <div class="input-row">
+              <div class="col"><input type="number" id="newSuppDose" placeholder="Napi adag (g/ml)" step="0.1"></div>
+              <div class="col"><input type="number" id="newSuppPack" placeholder="Kiszerelés (g/ml)" step="10"></div>
+            </div>
+            <button class="btn-save" style="width:100%; margin-top:10px;" onclick="saveAndAddCustomSupp()">Mentés és Hozzáadás</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vásárlólista -->
+      <div class="card">
+        <div class="section-title">🛒 Havi Vásárlólista</div>
+        <div class="sl-container" id="shoppingListHtml"></div>
+        <button class="btn-copy" id="copyBtn" onclick="copyShopping()">📋 Lista Másolása (Boltosnak)</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // 1. HÚS KONFIGURÁCIÓK
+  // ==========================================
+  const animalIds = ["p_csont", "p_menu", "p_hus", "p_maj", "p_bels"];
+
+  const config = [
+    { id: "csont", label: "1. Csontos hús", defKisz: 10, options: ["Pecsenye kacsa farhát darálva", "Pecsenye kacsa farhát (egész)", "Pecsenye kacsa nyak darálva", "Kacsa Menü (csontos nyesedék)", "Pecsenye kacsa láb-szárny", "Pulyka darálék (húsos/csontos)", "Lazac darálva (fej, gerinc)"] },
+    { id: "menu", label: "2. Fő Hús / Kész Menü", defKisz: 10, options: ["Marha Menü Belsőséggel és Zöldpacallal", "Marha Menü Belsőséggel és Tőggyel", "Szarvas-Bárány Menü", "Szarvas-Marha Menü", "Szarvas-Kacsa Menü", "Kacsa-Marha Menü", "Nyúl-Kacsa Menü", "Marha-Bárány Menü", "Pulyka Menü Szívvel"], hasCheckbox: true },
+    { id: "hus", label: "3. Tiszta Izomhús", defKisz: 15, options: ["Marha nyesedék darálva", "Pulykaszív", "Lazac hasaalja (1 kg)", "Nyúl darálék (belsőséggel, 2 kg)"] },
+    { id: "maj", label: "4. Tiszta Máj", defKisz: 1, options: ["Marha máj", "Csirkemáj", "Nyúl máj", "Pulykamáj"] },
+    { id: "bels", label: "5. Egyéb Belsőség", defKisz: 10, options: ["Marha zöldpacal darálva (100%)", "Bárány vegyes belsőség darálva", "Marha lép / vese"] },
+    { id: "rost", label: "6. Zöldség / Rost", defKisz: 10, options: ["Pépesített zöldségmix (Répa, Alma, Cukkini)", "Szárított rost keverék"] }
+  ];
+
+  // ==========================================
+  // 2. KIEGÉSZÍTŐK ADATBÁZISA
+  // ==========================================
+  const baseSuppLibrary = {
+    'kelp': { name: '🌿 Barna alga / Kelp', calcDose: w => 0.5, defPack: 100, unit: 'g', szorzo: 30, desc: 'Jód pótlás (Kötelező).' },
+    'mussel': { name: '🦴 Zöldkagylópor', calcDose: w => parseFloat(Math.max(0.5, w/10).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Porc- és ízületvédő.' },
+    'collagen': { name: '🥩 Kollagén por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 125, unit: 'g', szorzo: 30, desc: 'Inak védelme. C-vitamin kötelező mellé!' },
+    'rosehip': { name: '🌹 Csipkebogyó por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Természetes C-vitamin a kollagén mellé.' },
+    'blood': { name: '🩸 Marhavér por', calcDose: w => parseFloat(Math.max(0.5, w*0.3).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Vas pótlására (ha nincs elég lép).' },
+    'salmon': { name: '🐟 Lazacolaj', calcDose: w => Math.max(1, Math.round(w/5)) * 2, defPack: 500, unit: 'ml', szorzo: 15, desc: 'Heti 3-4x. (1 pumpa = ~2ml).' },
+    'yeast': { name: '✨ Sörélesztő', calcDose: w => 2.0, defPack: 100, unit: 'g', szorzo: 30, desc: 'Tavasz / Ősz (Kúra).' }
+  };
+
+  let activeSupps = [];      // A jelenleg aktív/hozzáadott kártyák
+  let customSuppDefs = [];   // A felhasználó által mentett egyedi definíciók
+
+  // ==========================================
+  // 3. INICIALIZÁLÁS (Azonnali Futás)
+  // ==========================================
+  function initApp() {
+    // 1. Hús Kártyák Generálása
+    const containerHTML = document.getElementById("meat-grid");
+    containerHTML.innerHTML = "";
+    config.forEach((item, index) => {
+      let checkboxHTML = item.hasCheckbox ? `<div class="checkbox-group"><input type="checkbox" id="isCompleteMenu" onchange="autoFillGrams()" checked><label for="isCompleteMenu">Tartalmaz májat/belsőséget</label></div>` : "";
+      containerHTML.innerHTML += `
+        <div class="card meat-card">
+          <div class="meat-title"><span>${item.label}</span><span id="perc_${index}" class="badge">0%</span></div>
+          <div class="select-wrapper">
+            <select id="sel_${index}" onchange="checkMeatCustom(${index}); updateResults();" style="flex:1;"></select>
+            <button id="del_custom_${index}" class="btn-del" onclick="deleteMeatCustomOption(${index}, '${item.id}')" title="Törlés">🗑️</button>
+          </div>
+          <div class="custom-group" id="custom_group_${index}">
+            <input type="text" id="custom_${index}" placeholder="Új név...">
+            <button class="btn-save" onclick="saveMeatCustomOption(${index}, '${item.id}')">Mentés</button>
+          </div>
+          ${checkboxHTML}
+          <div class="input-row">
+            <div class="col"><label>Napi (g)</label><input type="number" id="adag_${index}" oninput="handleManualGram(${index})"></div>
+            <div class="col"><label>Bolt (kg)</label><input type="number" id="kisz_${index}" value="${item.defKisz}" step="0.5" oninput="updateResults()"></div>
+          </div>
+          <div class="meat-stats" id="res_${index}"></div>
+        </div>
+      `;
+    });
+    config.forEach((item, index) => renderMeatSelect(index, item.id));
+
+    // 2. Kiegészítők Betöltése
+    loadSuppsData();
+    renderSuppDropdown();
+    renderActiveSupps();
+
+    // 3. Csúszkák feliratozása
+    animalIds.forEach(id => { document.getElementById("val_" + id).innerText = document.getElementById(id).value + "%"; });
+    document.getElementById("val_p_rost").innerText = document.getElementById("p_rost").value + "%";
+
+    // 4. Első Számolás
+    applyProfile();
+  }
+  window.onload = initApp;
+
+
+  // ==========================================
+  // 4. KIEGÉSZÍTŐK LOGIKÁJA
+  // ==========================================
+  function loadSuppsData() {
+    customSuppDefs = JSON.parse(localStorage.getItem('barf_custom_supp_defs') || '[]');
+    let savedActive = localStorage.getItem('barf_active_supps_v3');
+    if (savedActive) {
+      activeSupps = JSON.parse(savedActive);
+    } else {
+      // Kezdő beállítás új felhasználónak
+      activeSupps = [
+        { instId: 's_kelp', defId: 'kelp', name: '🌿 Barna alga / Kelp', dose: 0.5, pack: 100, unit: 'g', szorzo: 30, isManual: false, desc: baseSuppLibrary['kelp'].desc },
+        { instId: 's_salmon', defId: 'salmon', name: '🐟 Lazacolaj', dose: 4, pack: 500, unit: 'ml', szorzo: 15, isManual: false, desc: baseSuppLibrary['salmon'].desc }
+      ];
+      saveActiveSupps();
+    }
+  }
+
+  function saveActiveSupps() { localStorage.setItem('barf_active_supps_v3', JSON.stringify(activeSupps)); }
+  function saveCustomSuppDefs() { localStorage.setItem('barf_custom_supp_defs', JSON.stringify(customSuppDefs)); }
+
+  // A Legördülő Menü Generálása a kiegészítőknél
+  function renderSuppDropdown() {
+    let sel = document.getElementById("suppSelect");
+    let html = `<optgroup label="Alap Kiegészítők">`;
+    for(let key in baseSuppLibrary) {
+      html += `<option value="${key}">${baseSuppLibrary[key].name}</option>`;
+    }
+    html += `</optgroup>`;
+
+    if(customSuppDefs.length > 0) {
+      html += `<optgroup label="Saját Kiegészítők">`;
+      customSuppDefs.forEach(c => { html += `<option value="${c.defId}">${c.name}</option>`; });
+      html += `</optgroup>`;
+    }
+    html += `<option value="new">➕ Egyéb (Új hozzáadása)...</option>`;
+    sel.innerHTML = html;
+    onSuppSelectChange();
+  }
+
+  // Amikor változik a kiegészítő legördülő
+  function onSuppSelectChange() {
+    let val = document.getElementById("suppSelect").value;
+    let inputs = document.getElementById("newSuppInputs");
+    let btnAdd = document.getElementById("btnAddPredefSupp");
+    let btnDel = document.getElementById("btnDelCustomSupp");
+
+    if (val === "new") {
+      inputs.style.display = "block";
+      btnAdd.style.display = "none";
+      btnDel.style.display = "none";
+    } else {
+      inputs.style.display = "none";
+      btnAdd.style.display = "block";
+      // Törlés gomb csak saját mentett kiegészítőnél látszik
+      btnDel.style.display = val.startsWith("cust_") ? "inline-block" : "none";
+    }
+  }
+
+  // Törli a mentett SAJÁT kiegészítőt az adatbázisból (és a dropdownból)
+  function deleteCustomSuppDef() {
+    let val = document.getElementById("suppSelect").value;
+    if(val.startsWith("cust_")) {
+      customSuppDefs = customSuppDefs.filter(c => c.defId !== val);
+      saveCustomSuppDefs();
+      renderSuppDropdown();
+    }
+  }
+
+  // Új Kiegészítő Mentése és Hozzáadása
+  function saveAndAddCustomSupp() {
+    let name = document.getElementById("newSuppName").value.trim();
+    let dose = parseFloat(document.getElementById("newSuppDose").value) || 0;
+    let pack = parseFloat(document.getElementById("newSuppPack").value) || 100;
+    if(!name || dose <= 0) return alert("Kérlek add meg a nevét és a napi adagot!");
+
+    let newDef = { defId: 'cust_' + Date.now(), name: '➕ ' + name, defaultDose: dose, defaultPack: pack, unit: 'g/ml', szorzo: 30, desc: 'Saját kiegészítő.' };
+    customSuppDefs.push(newDef);
+    saveCustomSuppDefs();
+
+    // Hozzá is adjuk az aktív listához
+    activeSupps.push({ instId: 'inst_' + Date.now(), defId: newDef.defId, name: newDef.name, dose: dose, pack: pack, unit: newDef.unit, szorzo: 30, isManual: true, desc: newDef.desc });
+    saveActiveSupps();
+    
+    // Mezők ürítése és frissítés
+    document.getElementById("newSuppName").value = "";
+    document.getElementById("newSuppDose").value = "";
+    document.getElementById("newSuppPack").value = "";
+    renderSuppDropdown();
+    renderActiveSupps();
+    updateResults();
+  }
+
+  // Kiválasztott kiegészítő hozzáadása a menühöz
+  function addSelectedSupp() {
+    let val = document.getElementById("suppSelect").value;
+    if(val === "new") return;
+    
+    let weight = parseFloat(document.getElementById("dogWeight").value) || 0;
+    let def, dose, pack, unit, szorzo, desc, name;
+
+    if(baseSuppLibrary[val]) {
+      def = baseSuppLibrary[val];
+      dose = def.calcDose(weight); pack = def.defPack; unit = def.unit; szorzo = def.szorzo; desc = def.desc; name = def.name;
+    } else {
+      def = customSuppDefs.find(c => c.defId === val);
+      if(!def) return;
+      dose = def.defaultDose; pack = def.defaultPack; unit = def.unit; szorzo = def.szorzo; desc = def.desc; name = def.name;
+    }
+
+    activeSupps.push({ instId: 'inst_' + Date.now(), defId: val, name: name, dose: dose, pack: pack, unit: unit, szorzo: szorzo, isManual: false, desc: desc });
+    saveActiveSupps();
+    renderActiveSupps();
+    updateResults();
+  }
+
+  // Eltávolítás a listából
+  function removeActiveSupp(instId) {
+    activeSupps = activeSupps.filter(s => s.instId !== instId);
+    saveActiveSupps();
+    renderActiveSupps();
+    updateResults();
+  }
+
+  // Ha a felhasználó a kártyán átírja az adagot vagy a kiszerelést
+  function onActiveSuppChange(instId) {
+    let supp = activeSupps.find(s => s.instId === instId);
+    if(supp) {
+      let newDose = parseFloat(document.getElementById(`dose_${instId}`).value) || 0;
+      if (newDose !== supp.dose) { supp.isManual = true; } // Ha kézzel belenyúlt, onnantól nem számoljuk újra a súllyal!
+      supp.dose = newDose;
+      supp.pack = parseFloat(document.getElementById(`pack_${instId}`).value) || supp.pack;
+      saveActiveSupps();
+      updateResults();
+    }
+  }
+
+  // Újraszámolja a kiegészítőket, ha megváltozik a kutya súlya (csak amibe nem nyúltak bele kézzel)
+  function recalcAutoSupps() {
+    let weight = parseFloat(document.getElementById("dogWeight").value) || 0;
+    let changed = false;
+    activeSupps.forEach(s => {
+      if(!s.isManual && baseSuppLibrary[s.defId]) {
+        let newDose = baseSuppLibrary[s.defId].calcDose(weight);
+        if (s.dose !== newDose) { s.dose = newDose; changed = true; }
+      }
+    });
+    if(changed) { saveActiveSupps(); renderActiveSupps(); }
+  }
+
+  // Kiegészítő kártyák kirajzolása HTML-be
+  function renderActiveSupps() {
+    let html = "";
+    activeSupps.forEach(s => {
+      html += `
+      <div class="supp-card">
+        <div class="supp-card-header">
+          <span>${s.name}</span>
+          <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="Eltávolítás">🗑️</button>
+        </div>
+        <div class="supp-desc">${s.desc}</div>
+        <div class="input-row" style="margin-bottom:8px;">
+          <div class="col"><label>Napi adag (${s.unit})</label><input type="number" id="dose_${s.instId}" value="${s.dose}" step="0.1" oninput="onActiveSuppChange('${s.instId}')"></div>
+          <div class="col"><label>Kiszerelés (${s.unit})</label><input type="number" id="pack_${s.instId}" value="${s.pack}" step="10" oninput="onActiveSuppChange('${s.instId}')"></div>
+        </div>
+        <div class="supp-stats" id="stat_${s.instId}">-</div>
+      </div>`;
+    });
+    
+    if(activeSupps.length === 0) {
+      html = `<div style="text-align:center; padding: 15px; color:var(--text-muted); font-size:12px;">Nincs kiegészítő hozzáadva a menühöz.</div>`;
+    }
+    document.getElementById("active-supps-container").innerHTML = html;
+  }
+
+
+  // ==========================================
+  // 5. CSÚSZKÁK ÉS HÚS MATEK
+  // ==========================================
+  function applyProfile() { const profileVal = document.getElementById("dogProfile").value; if(profileVal !== "custom") { document.getElementById("dogPercent").value = profileVal; autoFillGrams(); } }
+  function handleSlider(activeId) { let activeSlider = document.getElementById(activeId); let activeVal = parseInt(activeSlider.value) || 0; let sumOthers = 0; animalIds.forEach(id => { if (id !== activeId) sumOthers += parseInt(document.getElementById(id).value) || 0; }); if (sumOthers + activeVal > 100) activeSlider.value = 100 - sumOthers; document.getElementById("val_" + activeId).innerText = activeSlider.value + "%"; autoFillGrams(); }
+  function handleRostSlider() { document.getElementById("val_p_rost").innerText = document.getElementById("p_rost").value + "%"; autoFillGrams(); }
+  
+  function handleManualGram(index) {
+    const weight = parseFloat(document.getElementById("dogWeight").value) || 0;
+    const percent = parseFloat(document.getElementById("dogPercent").value) || 0;
+    const baseGrams = Math.round(weight * (percent / 100) * 1000);
+    const cbMenu = document.getElementById("isCompleteMenu");
+    const isComplete = cbMenu ? cbMenu.checked : false;
+
+    if (baseGrams > 0) {
+      const manualGrams = parseFloat(document.getElementById(`adag_${index}`).value) || 0;
+      let calcPercent = Math.round((manualGrams / baseGrams) * 100);
+
+      if ((index === 3 || index === 4) && isComplete && manualGrams > 0) { document.getElementById("isCompleteMenu").checked = false; }
+      if (index === 1 && document.getElementById("isCompleteMenu")?.checked) {
+        let p_maj = parseInt(document.getElementById("p_maj").value) || 0; let p_bels = parseInt(document.getElementById("p_bels").value) || 0;
+        let realMenuPercent = calcPercent - p_maj - p_bels; if (realMenuPercent < 0) realMenuPercent = 0;
+        let slider = document.getElementById("p_menu"); if(slider) { slider.value = realMenuPercent; document.getElementById("val_p_menu").innerText = slider.value + "%"; }
+      } else if (index < 5) {
+        let slider = document.getElementById(animalIds[index]); if(slider) { slider.value = calcPercent; document.getElementById("val_" + animalIds[index]).innerText = slider.value + "%"; }
+      } else if (index === 5) {
+        let slider = document.getElementById("p_rost"); if(slider) { slider.value = calcPercent; document.getElementById("val_p_rost").innerText = slider.value + "%"; }
+      }
+    }
+    updateResults(); 
+  }
+
+  function autoFillGrams() {
+    const weight = parseFloat(document.getElementById("dogWeight").value) || 0;
+    const percent = parseFloat(document.getElementById("dogPercent").value) || 0;
+    const baseGrams = Math.round(weight * (percent / 100) * 1000);
+
+    const p_csont = (parseFloat(document.getElementById("p_csont").value) || 0) / 100;
+    const p_menu = (parseFloat(document.getElementById("p_menu").value) || 0) / 100;
+    const p_hus = (parseFloat(document.getElementById("p_hus").value) || 0) / 100;
+    const p_maj = (parseFloat(document.getElementById("p_maj").value) || 0) / 100;
+    const p_bels = (parseFloat(document.getElementById("p_bels").value) || 0) / 100;
+    const p_rost = (parseFloat(document.getElementById("p_rost").value) || 0) / 100;
+
+    const cbMenu = document.getElementById("isCompleteMenu"); const isComplete = cbMenu ? cbMenu.checked : false;
+    const eff_menu = isComplete ? (p_menu + p_maj + p_bels) : p_menu;
+    const eff_maj = isComplete ? 0 : p_maj;
+    const eff_bels = isComplete ? 0 : p_bels;
+
+    document.getElementById("adag_0").value = Math.round(baseGrams * p_csont);
+    document.getElementById("adag_1").value = Math.round(baseGrams * eff_menu);
+    document.getElementById("adag_2").value = Math.round(baseGrams * p_hus);
+    document.getElementById("adag_3").value = Math.round(baseGrams * eff_maj);
+    document.getElementById("adag_4").value = Math.round(baseGrams * eff_bels);
+    document.getElementById("adag_5").value = Math.round(baseGrams * p_rost);
+
+    recalcAutoSupps(); // A kiegészítőket is lefrissítjük a súllyal!
+    updateResults();
+  }
+
+
+  // ==========================================
+  // 6. NAPTÁR ÉS VÁSÁRLÓLISTA GENERÁLÁSA
+  // ==========================================
+  function updateCalendar() {
+    const isFasting = document.getElementById("isFasting").checked;
+    const isFishDay = document.getElementById("isFishDay").checked;
+    
+    const days = [
+        { name: "Hétfő", task: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
+        { name: "Kedd", task: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>" },
+        { name: "Szerda", task: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
+        { name: "Csütörtök", task: "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>" },
+        { name: "Péntek", task: isFishDay ? "🐟 Halas Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" : "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
+        { name: "Szombat", task: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>" },
+        { name: "Vasárnap", task: isFasting ? "🍽️ Koplalónap<br><span style='color:var(--danger)'>(Pocak pihen)</span>" : "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>" }
+    ];
+
+    let html = "";
+    days.forEach(d => {
+        let isFast = d.task.includes("Koplaló"); let isFish = d.task.includes("Halas");
+        let borderCol = isFast ? "var(--danger)" : (isFish ? "var(--info)" : "var(--card-border)");
+        let bgCol = isFast ? "rgba(239, 68, 68, 0.1)" : (isFish ? "rgba(59, 130, 246, 0.1)" : "rgba(0,0,0,0.25)");
+        html += `<div class="cal-day" style="border-color:${borderCol}; background:${bgCol}"><div class="cal-day-title">${d.name}</div><div class="cal-day-task">${d.task}</div></div>`;
+    });
+    document.getElementById("calendarGrid").innerHTML = html;
+  }
+
+  function updateResults() {
+    let totalAllati = 0, totalRost = 0;
+    const weight = parseFloat(document.getElementById("dogWeight").value) || 0;
+    const percent = parseFloat(document.getElementById("dogPercent").value) || 0;
+    const baseGrams = Math.round(weight * (percent / 100) * 1000);
+    const isFasting = document.getElementById("isFasting").checked;
+    const daysInMonth = isFasting ? 26 : 30; 
+
+    let textList = `🛒 BARF VÁSÁRLÓLISTA (1 HÓNAPRA)\n`;
+    textList += `Testsúly: ${weight} kg | Adag: ${percent}% | Napok: ${daysInMonth} nap\n\n`;
+    textList += `🥩 HÚSOK / MENÜK:\n`;
+    let htmlList = "";
+
+    // 1. Húsok kalkulációja
+    config.forEach((item, i) => {
+      const adag = parseFloat(document.getElementById(`adag_${i}`).value) || 0;
+      const kisz = parseFloat(document.getElementById(`kisz_${i}`).value) || 0;
+      
+      if (i === 5) totalRost += adag; else totalAllati += adag;
+      let currentPercent = baseGrams > 0 ? ((adag / baseGrams) * 100).toFixed(1) : 0;
+      document.getElementById(`perc_${i}`).innerText = currentPercent + "%";
+      
+      const haviKg = (adag * daysInMonth) / 1000;
+      const csomagDb = kisz > 0 ? Math.ceil(haviKg / kisz) : 0;
+      const kitartNap = adag > 0 ? Math.floor((kisz * 1000) / adag) : 0;
+
+      document.getElementById(`res_${i}`).innerHTML = `
+        <div class="meat-stat-box"><span class="meat-stat-lbl">${daysInMonth} nap</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">Vásárolj</span><span class="meat-stat-val">${csomagDb} db</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">1 cs. tart</span><span class="meat-stat-val">${kitartNap} nap</span></div>
+      `;
+
+      if(haviKg > 0) {
+        let selName = document.getElementById(`sel_${i}`).value;
+        htmlList += `<div class="sl-item"><span>${selName}</span> <b>${haviKg.toFixed(2)} kg</b></div>`;
+        textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg-os csomag)\n`;
+      }
+    });
+
+    // 100% Ellenőrző
+    const targetSum = animalIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
+    document.getElementById("totalGramsMain").innerText = `${totalAllati} g`;
+    document.getElementById("totalGramsSub").innerText = `+ Rost kiegészítés: ${totalRost} g`;
+
+    const summaryCard = document.getElementById("totalSummaryCard"); const warningText = document.getElementById("warningText");
+    if (targetSum !== 100 || (Math.abs(totalAllati - baseGrams) > 2)) { summaryCard.classList.add("error-state"); warningText.style.display = "block"; } 
+    else { summaryCard.classList.remove("error-state"); warningText.style.display = "none"; }
+
+    updateCalendar();
+
+    // 2. Aktív Kiegészítők Kalkulációja a Vásárlólistára
+    textList += `\n💊 KIEGÉSZÍTŐK:\n`;
+    activeSupps.forEach(s => {
+      let haviAdag = s.dose * s.szorzo; 
+      let db = s.pack > 0 ? Math.ceil(haviAdag / s.pack) : 0;
+      
+      let statEl = document.getElementById(`stat_${s.instId}`);
+      if(statEl) {
+        statEl.innerHTML = `Havi szükséglet: <b>${haviAdag} ${s.unit}</b> <span style="float:right;">Vásárolj: <b style="color:#fff">${db} db</b></span>`;
+      }
+
+      if(haviAdag > 0) {
+        htmlList += `<div class="sl-item sl-item-supp"><span>${s.name}</span> <b>${db} db (${s.pack}${s.unit})</b></div>`;
+        textList += `- ${s.name}: ${db} db (${s.pack}${s.unit})\n`;
+      }
+    });
+
+    document.getElementById("shoppingListHtml").innerHTML = htmlList;
+    window.currentShoppingListText = textList;
+  }
+
+  function copyShopping() {
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(window.currentShoppingListText); } 
+    else { let t = document.createElement("textarea"); t.value = window.currentShoppingListText; t.style.position = "fixed"; t.style.left = "-999999px"; document.body.appendChild(t); t.focus(); t.select(); try { document.execCommand('copy'); } catch (err) {} t.remove(); }
+    const btn = document.getElementById("copyBtn"); btn.innerText = "✅ Lista Sikeresen Másolva!"; btn.style.background = "var(--info)"; setTimeout(() => { btn.innerText = "📋 Lista Másolása (Boltosnak)"; btn.style.background = "var(--success)"; }, 2500);
+  }
+
+  // --- SAJÁT HÚSOK KEZELÉSE ---
+  function getMeatCustomOptions(catId) { const saved = localStorage.getItem('premium_barf_meat_' + catId); return saved ? JSON.parse(saved) : []; }
+  function saveMeatCustomOption(index, catId) {
+    const input = document.getElementById(`custom_${index}`); const newVal = input.value.trim(); if (!newVal) return;
+    let saved = getMeatCustomOptions(catId); if (!saved.includes(newVal)) { saved.push(newVal); localStorage.setItem('premium_barf_meat_' + catId, JSON.stringify(saved)); }
+    input.value = ""; renderMeatSelect(index, catId, newVal);
+  }
+  function deleteMeatCustomOption(index, catId) {
+    const sel = document.getElementById(`sel_${index}`); const val = sel.value;
+    let saved = getMeatCustomOptions(catId); saved = saved.filter(item => item !== val);
+    localStorage.setItem('premium_barf_meat_' + catId, JSON.stringify(saved)); renderMeatSelect(index, catId);
+  }
+  function renderMeatSelect(index, catId, selectedValue = null) {
+    const sel = document.getElementById(`sel_${index}`); const customOpts = getMeatCustomOptions(catId);
+    let optsHTML = config[index].options.map(o => `<option value="${o}">${o}</option>`).join('');
+    if (customOpts.length > 0) optsHTML += `<optgroup label="Saját mentett húsok">` + customOpts.map(o => `<option value="${o}">${o}</option>`).join('') + `</optgroup>`;
+    optsHTML += `<option value="egyeb">➕ Egyéb (Új hozzáadása)...</option>`;
+    sel.innerHTML = optsHTML; if (selectedValue) sel.value = selectedValue; else if (!sel.value && sel.options.length > 0) sel.value = sel.options[0].value;
+    checkMeatCustom(index);
+  }
+  function checkMeatCustom(index) {
+    const sel = document.getElementById(`sel_${index}`); const group = document.getElementById(`custom_group_${index}`); const delBtn = document.getElementById(`del_custom_${index}`); const catId = config[index].id; const customOpts = getMeatCustomOptions(catId);
+    if(sel.value === "egyeb") { group.style.display = "flex"; document.getElementById(`custom_${index}`).focus(); } else { group.style.display = "none"; }
+    if(customOpts.includes(sel.value)) { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
+    updateResults(); // Azonnali frissítés a bevásárlólistán
+  }
+</script>
+
+</body>
+</html>
