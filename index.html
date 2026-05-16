@@ -629,6 +629,71 @@
   // ==========================================
   // 3. INICIALIZÁLÁS (Azonnali Futás)
   // ==========================================
+  function saveSettings() {
+    let settings = {
+      dogWeight: document.getElementById("dogWeight").value,
+      dogPercent: document.getElementById("dogPercent").value,
+      dogProfile: document.getElementById("dogProfile").value,
+      isFasting: document.getElementById("isFasting").checked,
+      isFishDay: document.getElementById("isFishDay").checked,
+      isCompleteMenu: document.getElementById("isCompleteMenu") ? document.getElementById("isCompleteMenu").checked : true,
+      sliders: {},
+      packSizes: {}
+    };
+    animalIds.forEach(id => {
+      let slider = document.getElementById(id);
+      if(slider) settings.sliders[id] = slider.value;
+    });
+    settings.sliders.p_rost = document.getElementById("p_rost").value;
+    
+    config.forEach((item, index) => {
+      let kiszEl = document.getElementById("kisz_" + index);
+      if (kiszEl) {
+        settings.packSizes[index] = kiszEl.value;
+      }
+    });
+
+    localStorage.setItem('barf_settings_v3', JSON.stringify(settings));
+  }
+
+  function loadSettings() {
+    let saved = localStorage.getItem('barf_settings_v3');
+    if (!saved) return;
+    try {
+      let settings = JSON.parse(saved);
+      if(settings.dogWeight) document.getElementById("dogWeight").value = settings.dogWeight;
+      if(settings.dogPercent) document.getElementById("dogPercent").value = settings.dogPercent;
+      if(settings.dogProfile) document.getElementById("dogProfile").value = settings.dogProfile;
+      if(settings.isFasting !== undefined) document.getElementById("isFasting").checked = settings.isFasting;
+      if(settings.isFishDay !== undefined) document.getElementById("isFishDay").checked = settings.isFishDay;
+      if(settings.isCompleteMenu !== undefined && document.getElementById("isCompleteMenu")) {
+        document.getElementById("isCompleteMenu").checked = settings.isCompleteMenu;
+      }
+      
+      if(settings.sliders) {
+        animalIds.forEach(id => {
+          if(settings.sliders[id] !== undefined) {
+            let el = document.getElementById(id);
+            if(el) el.value = settings.sliders[id];
+          }
+        });
+        if(settings.sliders.p_rost !== undefined) {
+            let el = document.getElementById("p_rost");
+            if(el) el.value = settings.sliders.p_rost;
+        }
+      }
+      
+      if(settings.packSizes) {
+        config.forEach((item, index) => {
+          if(settings.packSizes[index] !== undefined) {
+             let kiszEl = document.getElementById("kisz_" + index);
+             if (kiszEl) kiszEl.value = settings.packSizes[index];
+          }
+        });
+      }
+    } catch(e) {}
+  }
+
   function initApp() {
     savedPrices = JSON.parse(localStorage.getItem('barf_prices_v6') || '{}');
     
@@ -671,12 +736,18 @@
     renderSuppDropdown();
     renderActiveSupps();
 
-    // 3. Csúszkák feliratozása
+    // 3. Beállítások visszatöltése
+    loadSettings();
+
+    // 4. Csúszkák feliratozása
     animalIds.forEach(id => { document.getElementById("val_" + id).innerText = document.getElementById(id).value + "%"; });
     document.getElementById("val_p_rost").innerText = document.getElementById("p_rost").value + "%";
 
-    // 4. Első Számolás
+    // 5. Első Számolás
     applyProfile();
+    if (document.getElementById("dogProfile").value === "custom") {
+      autoFillGrams();
+    }
   }
   window.onload = initApp;
 
@@ -1127,6 +1198,8 @@
 
     document.getElementById("shoppingListHtml").innerHTML = htmlList;
     window.currentShoppingListText = textList;
+
+    saveSettings();
   }
 
   function copyShopping() {
