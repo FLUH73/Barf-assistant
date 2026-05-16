@@ -125,6 +125,8 @@
   .custom-group { display: none; margin-top: 8px; gap: 8px; }
   .btn-save { background: var(--success); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; white-space: nowrap;}
 
+  .price-highlight { font-size: 14px; font-weight: 800; color: var(--accent); display: flex; align-items: flex-end; justify-content: flex-end; height: 100%; padding-bottom: 10px;}
+
   .meat-stats { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; }
   .meat-stat-box { flex: 1; background: rgba(0,0,0,0.25); text-align: center; border-radius: 6px; padding: 6px 2px; border: 1px solid rgba(255,255,255,0.05); }
   .meat-stat-val { font-size: 13px; font-weight: bold; color: var(--success); display: block; margin-top: 2px;}
@@ -156,6 +158,7 @@
   /* --- VÁSÁRLÓLISTA ÉS FŐ ÖSSZESÍTŐ --- */
   .sl-container { background: rgba(0,0,0,0.15); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; }
   .sl-item { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-main); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .sl-total { display: flex; justify-content: space-between; font-size: 14.5px; color: var(--text-main); font-weight: 900; padding: 12px 0 6px; border-top: 2px solid rgba(255,255,255,0.2); margin-top: 6px; }
   .sl-item b { color: var(--success); }
   .sl-item-supp { color: var(--info); font-size: 12px; }
   .btn-copy { width: 100%; background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
@@ -214,7 +217,7 @@
         </div>
         
         <div class="checkbox-group fish">
-          <input type="checkbox" id="isFishDay" onchange="updateCalendar()" checked>
+          <input type="checkbox" id="isFishDay" onchange="updateResults()" checked>
           <label for="isFishDay"><b>Heti 1 halas menü tartása.</b></label>
         </div>
       </div>
@@ -359,7 +362,7 @@
       dailyG: "Napi (g)",
       shopKg: "Bolt (kg)",
       noSupps: "Nincs kiegészítő hozzáadva a menühöz.",
-      shopListHeader: "🛒 BARF VÁSÁRLÓLISTA (1 HÓNAPRA)",
+      shopListHeader: "🛒 BARF VÁSÁRLÓLISTA ÉS KÖLTSÉG (1 HÓNAP)",
       weight: "Testsúly",
       dose: "Adag",
       days: "Napok",
@@ -372,8 +375,29 @@
       newValLabel: "Új név...",
       btnSaveLabel: "Mentés",
       btnDelLabel: "🗑️",
+      delTooltip: "Törlés",
       addOtherLabel: "➕ Egyéb (Új hozzáadása)...",
       customMeatGroupLabel: "Saját mentett húsok",
+      monthlyEstimateLabel: "Havi becsült költség:",
+      monthlyEstimateSummaryText: "💰 HAVI BECSÜLT KÖLTSÉG",
+      currency: "Ft",
+      costLabel: "Költség",
+      kgPrice: "Kilós ár",
+      optional: "Opcionális",
+      restoreDeleted: "♻️ Töröltek visszaállítása",
+      restoreConfirm: "Biztosan visszaállítasz minden törölt húst ebben a kategóriában?",
+      restoreConfirmSupp: "Biztosan visszaállítasz minden törölt kiegészítőt?",
+      freqLabel: "Gyakoriság",
+      freqAll: "Minden nap",
+      freq6: "Heti 6x",
+      freq5: "Heti 5x",
+      freq4: "Heti 4x",
+      freq3: "Heti 3x",
+      freq2: "Heti 2x",
+      freq1: "Heti 1x",
+      pricePerBox: "Ár / doboz",
+      missingNameOrDose: "Kérlek add meg a nevét és a napi adagot!",
+      baseSuppsLabel: "Alap Kiegészítők",
       meatLabel_0: "1. Csontos hús",
       meatLabel_1: "2. Fő Hús / Kész Menü",
       meatLabel_2: "3. Tiszta Izomhús",
@@ -385,7 +409,13 @@
       taskBarfMenuEgg: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>",
       taskBarfMenuNoSupp: "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>",
       taskFishMenu: "🐟 Halas Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>",
-      taskFasting: "🍽️ Koplalónap<br><span style='color:var(--danger)'>(Pocak pihen)</span>"
+      taskFasting: "🍽️ Koplalónap<br><span style='color:var(--danger)'>(Pocak pihen)</span>",
+      menuBarfBase: "🥩 BARF Menü",
+      menuFishBase: "🐟 Halas Menü",
+      menuFastBase: "🍽️ Koplalónap",
+      noSuppsHere: "Kieg. nélkül",
+      daysStr: "nap",
+      copyListAction: "✅ Lista Sikeresen Másolva!"
     },
     en: {
       title: "Pro BARF Assistant",
@@ -430,7 +460,7 @@
       dailyG: "Daily (g)",
       shopKg: "Buy (kg)",
       noSupps: "No supplements added to the menu.",
-      shopListHeader: "🛒 BARF SHOPPING LIST (1 MONTH)",
+      shopListHeader: "🛒 BARF SHOPPING LIST & COST (1 MONTH)",
       weight: "Weight",
       dose: "Dose",
       days: "Days",
@@ -443,8 +473,29 @@
       newValLabel: "New name...",
       btnSaveLabel: "Save",
       btnDelLabel: "🗑️",
+      delTooltip: "Delete",
       addOtherLabel: "➕ Other (Add new)...",
       customMeatGroupLabel: "My saved meats",
+      monthlyEstimateLabel: "Monthly estimated cost:",
+      monthlyEstimateSummaryText: "💰 MONTHLY ESTIMATED COST",
+      currency: "$",
+      costLabel: "Cost",
+      kgPrice: "Price per kg",
+      optional: "Optional",
+      restoreDeleted: "♻️ Restore deleted items",
+      restoreConfirm: "Are you sure you want to restore all deleted items in this category?",
+      restoreConfirmSupp: "Are you sure you want to restore all deleted supplements?",
+      freqLabel: "Frequency",
+      freqAll: "Every day",
+      freq6: "6x a week",
+      freq5: "5x a week",
+      freq4: "4x a week",
+      freq3: "3x a week",
+      freq2: "2x a week",
+      freq1: "1x a week",
+      pricePerBox: "Price / box",
+      missingNameOrDose: "Please provide a name and valid daily dose!",
+      baseSuppsLabel: "Base Supplements",
       meatLabel_0: "1. Raw Meaty Bones",
       meatLabel_1: "2. Main Menu / Meat",
       meatLabel_2: "3. Pure Muscle Meat",
@@ -456,7 +507,12 @@
       taskBarfMenuEgg: "🥩 BARF Menu<br><span style='color:var(--accent)'>+ 🥚 Egg</span>",
       taskBarfMenuNoSupp: "🥩 BARF Menu<br><span style='color:var(--text-muted)'>No Supp.</span>",
       taskFishMenu: "🐟 Fish Menu<br><span style='color:var(--info)'>+ Salmon Oil</span>",
-      taskFasting: "🍽️ Fasting Day<br><span style='color:var(--danger)'>(Tummy rest)</span>"
+      taskFasting: "🍽️ Fasting Day<br><span style='color:var(--danger)'>(Tummy rest)</span>",
+      menuBarfBase: "🥩 BARF Menu",
+      menuFishBase: "🐟 Fish Menu",
+      menuFastBase: "🍽️ Fasting Day",
+      noSuppsHere: "No supplements",
+      copyListAction: "✅ List successfully copied!"
     }
   };
 
@@ -483,7 +539,7 @@
     
     // Buttons
     document.getElementById('btnAddPredefSupp').innerText = tr('btnAddPredef');
-    document.getElementById('btnDelCustomSupp').title = tr('btnDelLabel');
+    document.getElementById('btnDelCustomSupp').title = tr('delTooltip');
     document.getElementById('newSuppInputs').querySelector('label').innerText = tr('customSuppLabel');
     document.getElementById('newSuppName').placeholder = tr('customSuppNameInfo');
     document.getElementById('newSuppDose').placeholder = tr('customSuppDoseInfo');
@@ -545,34 +601,37 @@
   const animalIds = ["p_csont", "p_menu", "p_hus", "p_maj", "p_bels"];
 
   const config = [
-    { id: "csont", label: "1. Csontos hús", defKisz: 10, options: ["Pecsenye kacsa farhát darálva", "Pecsenye kacsa farhát (egész)", "Pecsenye kacsa nyak darálva", "Kacsa Menü (csontos nyesedék)", "Pecsenye kacsa láb-szárny", "Pulyka darálék (húsos/csontos)", "Lazac darálva (fej, gerinc)"] },
-    { id: "menu", label: "2. Fő Hús / Kész Menü", defKisz: 10, options: ["Marha Menü Belsőséggel és Zöldpacallal", "Marha Menü Belsőséggel és Tőggyel", "Szarvas-Bárány Menü", "Szarvas-Marha Menü", "Szarvas-Kacsa Menü", "Kacsa-Marha Menü", "Nyúl-Kacsa Menü", "Marha-Bárány Menü", "Pulyka Menü Szívvel"], hasCheckbox: true },
-    { id: "hus", label: "3. Tiszta Izomhús", defKisz: 15, options: ["Marha nyesedék darálva", "Pulykaszív", "Lazac hasaalja (1 kg)", "Nyúl darálék (belsőséggel, 2 kg)"] },
-    { id: "maj", label: "4. Tiszta Máj", defKisz: 1, options: ["Marha máj", "Csirkemáj", "Nyúl máj", "Pulykamáj"] },
-    { id: "bels", label: "5. Egyéb Belsőség", defKisz: 10, options: ["Marha zöldpacal darálva (100%)", "Bárány vegyes belsőség darálva", "Marha lép / vese"] },
-    { id: "rost", label: "6. Zöldség / Rost", defKisz: 10, options: ["Pépesített zöldségmix (Répa, Alma, Cukkini)", "Szárított rost keverék"] }
+    { id: "csont", labelKey: "meatLabel_0", defKisz: 10, options: ["Pecsenye kacsa farhát darálva", "Pecsenye kacsa farhát (egész)", "Pecsenye kacsa nyak darálva", "Kacsa Menü (csontos nyesedék)", "Pecsenye kacsa láb-szárny", "Pulyka darálék (húsos/csontos)", "Lazac darálva (fej, gerinc)"] },
+    { id: "menu", labelKey: "meatLabel_1", defKisz: 10, options: ["Marha Menü Belsőséggel és Zöldpacallal", "Marha Menü Belsőséggel és Tőggyel", "Szarvas-Bárány Menü", "Szarvas-Marha Menü", "Szarvas-Kacsa Menü", "Kacsa-Marha Menü", "Nyúl-Kacsa Menü", "Marha-Bárány Menü", "Pulyka Menü Szívvel"], hasCheckbox: true },
+    { id: "hus", labelKey: "meatLabel_2", defKisz: 15, options: ["Marha nyesedék darálva", "Pulykaszív", "Lazac hasaalja (1 kg)", "Nyúl darálék (belsőséggel, 2 kg)"] },
+    { id: "maj", labelKey: "meatLabel_3", defKisz: 1, options: ["Marha máj", "Csirkemáj", "Nyúl máj", "Pulykamáj"] },
+    { id: "bels", labelKey: "meatLabel_4", defKisz: 10, options: ["Marha zöldpacal darálva (100%)", "Bárány vegyes belsőség darálva", "Marha lép / vese"] },
+    { id: "rost", labelKey: "meatLabel_5", defKisz: 10, options: ["Pépesített zöldségmix (Répa, Alma, Cukkini)", "Szárított rost keverék"] }
   ];
 
   // ==========================================
   // 2. KIEGÉSZÍTŐK ADATBÁZISA
   // ==========================================
   const baseSuppLibrary = {
-    'kelp': { name: '🌿 Barna alga / Kelp', calcDose: w => 0.5, defPack: 100, unit: 'g', szorzo: 30, desc: 'Jód pótlás (Kötelező).' },
-    'mussel': { name: '🦴 Zöldkagylópor', calcDose: w => parseFloat(Math.max(0.5, w/10).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Porc- és ízületvédő.' },
-    'collagen': { name: '🥩 Kollagén por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 125, unit: 'g', szorzo: 30, desc: 'Inak védelme. C-vitamin kötelező mellé!' },
-    'rosehip': { name: '🌹 Csipkebogyó por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Természetes C-vitamin a kollagén mellé.' },
-    'blood': { name: '🩸 Marhavér por', calcDose: w => parseFloat(Math.max(0.5, w*0.3).toFixed(1)), defPack: 100, unit: 'g', szorzo: 30, desc: 'Vas pótlására (ha nincs elég lép).' },
-    'salmon': { name: '🐟 Lazacolaj', calcDose: w => Math.max(1, Math.round(w/5)) * 2, defPack: 500, unit: 'ml', szorzo: 15, desc: 'Heti 3-4x. (1 pumpa = ~2ml).' },
-    'yeast': { name: '✨ Sörélesztő', calcDose: w => 2.0, defPack: 100, unit: 'g', szorzo: 30, desc: 'Tavasz / Ősz (Kúra).' }
+    'kelp': { name: '🌿 Barna alga / Kelp', calcDose: w => 0.5, defPack: 100, unit: 'g', freq: 7, desc: 'Jód pótlás (Kötelező).' },
+    'mussel': { name: '🦴 Zöldkagylópor', calcDose: w => parseFloat(Math.max(0.5, w/10).toFixed(1)), defPack: 100, unit: 'g', freq: 7, desc: 'Porc- és ízületvédő.' },
+    'collagen': { name: '🥩 Kollagén por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 125, unit: 'g', freq: 7, desc: 'Inak védelme. C-vitamin kötelező mellé!' },
+    'rosehip': { name: '🌹 Csipkebogyó por', calcDose: w => parseFloat(Math.max(0.5, w/5).toFixed(1)), defPack: 100, unit: 'g', freq: 7, desc: 'Természetes C-vitamin a kollagén mellé.' },
+    'blood': { name: '🩸 Marhavér por', calcDose: w => parseFloat(Math.max(0.5, w*0.3).toFixed(1)), defPack: 100, unit: 'g', freq: 7, desc: 'Vas pótlására (ha nincs elég lép).' },
+    'salmon': { name: '🐟 Lazacolaj', calcDose: w => Math.max(1, Math.round(w/5)) * 2, defPack: 500, unit: 'ml', freq: 3, desc: 'Heti 3-4x. (1 pumpa = ~2ml).' },
+    'yeast': { name: '✨ Sörélesztő', calcDose: w => 2.0, defPack: 100, unit: 'g', freq: 7, desc: 'Tavasz / Ősz (Kúra).' }
   };
 
   let activeSupps = [];      // A jelenleg aktív/hozzáadott kártyák
   let customSuppDefs = [];   // A felhasználó által mentett egyedi definíciók
+  let savedPrices = {}; 
 
   // ==========================================
   // 3. INICIALIZÁLÁS (Azonnali Futás)
   // ==========================================
   function initApp() {
+    savedPrices = JSON.parse(localStorage.getItem('barf_prices_v6') || '{}');
+    
     // 1. Hús Kártyák Generálása
     const containerHTML = document.getElementById("meat-grid");
     containerHTML.innerHTML = "";
@@ -580,10 +639,10 @@
       let checkboxHTML = item.hasCheckbox ? `<div class="checkbox-group"><input type="checkbox" id="isCompleteMenu" onchange="autoFillGrams()" checked><label for="isCompleteMenu">${tr('hasLiverCb')}</label></div>` : "";
       containerHTML.innerHTML += `
         <div class="card meat-card">
-          <div class="meat-title"><span>${tr('meatLabel_' + index) || item.label}</span><span id="perc_${index}" class="badge">0%</span></div>
+          <div class="meat-title"><span>${tr(item.labelKey)}</span><span id="perc_${index}" class="badge">0%</span></div>
           <div class="select-wrapper">
             <select id="sel_${index}" onchange="checkMeatCustom(${index}); updateResults();" style="flex:1;"></select>
-            <button id="del_custom_${index}" class="btn-del" onclick="deleteMeatCustomOption(${index}, '${item.id}')" title="${tr('btnDelLabel')}">🗑️</button>
+            <button id="del_custom_${index}" class="btn-del" onclick="deleteMeatCustomOption(${index}, '${item.id}')" title="${tr('delTooltip')}">🗑️</button>
           </div>
           <div class="custom-group" id="custom_group_${index}">
             <input type="text" id="custom_${index}" placeholder="${tr('newValLabel')}">
@@ -594,11 +653,18 @@
             <div class="col"><label>${tr('dailyG')}</label><input type="number" id="adag_${index}" oninput="handleManualGram(${index})"></div>
             <div class="col"><label>${tr('shopKg')}</label><input type="number" id="kisz_${index}" value="${item.defKisz}" step="0.5" oninput="updateResults()"></div>
           </div>
+          <div class="input-row" style="margin-top:6px;">
+            <div class="col" style="flex:1.5"><label style="color:var(--accent);">${tr('kgPrice')} (${tr('currency')}/kg)</label><input type="number" id="price_${index}" placeholder="${tr('optional')}" oninput="saveMeatPrice(${index})"></div>
+            <div class="col price-highlight" id="pack_price_${index}">0 ${tr('currency')}</div>
+          </div>
           <div class="meat-stats" id="res_${index}"></div>
         </div>
       `;
     });
-    config.forEach((item, index) => renderMeatSelect(index, item.id));
+    config.forEach((item, index) => {
+      renderMeatSelect(index, item.id);
+      loadMeatPrice(index);
+    });
 
     // 2. Kiegészítők Betöltése
     loadSuppsData();
@@ -616,6 +682,28 @@
 
 
   // ==========================================
+  // PÉNZÜGY (ÁRAK MENTÉSE ÉS BETÖLTÉSE)
+  // ==========================================
+  function saveMeatPrice(index) {
+    let selName = document.getElementById(`sel_${index}`).value;
+    let price = parseFloat(document.getElementById(`price_${index}`).value) || 0;
+    if(selName && selName !== "egyeb") {
+      savedPrices[selName] = price;
+      localStorage.setItem('barf_prices_v6', JSON.stringify(savedPrices));
+    }
+    updateResults();
+  }
+
+  function loadMeatPrice(index) {
+    let selName = document.getElementById(`sel_${index}`).value;
+    let priceInput = document.getElementById(`price_${index}`);
+    if(!priceInput) return;
+    if(savedPrices[selName]) { priceInput.value = savedPrices[selName]; } 
+    else { priceInput.value = ''; }
+  }
+
+
+  // ==========================================
   // 4. KIEGÉSZÍTŐK LOGIKÁJA
   // ==========================================
   function loadSuppsData() {
@@ -626,8 +714,8 @@
     } else {
       // Kezdő beállítás új felhasználónak
       activeSupps = [
-        { instId: 's_kelp', defId: 'kelp', name: '🌿 Barna alga / Kelp', dose: 0.5, pack: 100, unit: 'g', szorzo: 30, isManual: false, desc: baseSuppLibrary['kelp'].desc },
-        { instId: 's_salmon', defId: 'salmon', name: '🐟 Lazacolaj', dose: 4, pack: 500, unit: 'ml', szorzo: 15, isManual: false, desc: baseSuppLibrary['salmon'].desc }
+        { instId: 's_kelp', defId: 'kelp', name: baseSuppLibrary['kelp'].name, dose: 0.5, pack: 100, unit: 'g', freq: baseSuppLibrary['kelp'].freq, isManual: false, desc: baseSuppLibrary['kelp'].desc },
+        { instId: 's_salmon', defId: 'salmon', name: baseSuppLibrary['salmon'].name, dose: 4, pack: 500, unit: 'ml', freq: baseSuppLibrary['salmon'].freq, isManual: false, desc: baseSuppLibrary['salmon'].desc }
       ];
       saveActiveSupps();
     }
@@ -640,7 +728,7 @@
   function renderSuppDropdown() {
     let deletedSupps = JSON.parse(localStorage.getItem('barf_deleted_supp_defs') || '[]');
     let sel = document.getElementById("suppSelect");
-    let html = `<optgroup label="Alap Kiegészítők">`;
+    let html = `<optgroup label="${tr('baseSuppsLabel')}">`;
     for(let key in baseSuppLibrary) {
       if(!deletedSupps.includes(key)) {
         html += `<option value="${key}">${baseSuppLibrary[key].name}</option>`;
@@ -654,6 +742,7 @@
       html += `</optgroup>`;
     }
     html += `<option value="new">${tr('addOtherLabel')}</option>`;
+    if (deletedSupps.length > 0) html += `<option value="restore">${tr('restoreDeleted')}</option>`;
     sel.innerHTML = html;
     onSuppSelectChange();
   }
@@ -669,6 +758,17 @@
       inputs.style.display = "block";
       btnAdd.style.display = "none";
       btnDel.style.display = "none";
+    } else if (val === "restore") {
+      inputs.style.display = "none";
+      btnAdd.style.display = "none";
+      btnDel.style.display = "none";
+      if(confirm(tr('restoreConfirmSupp'))) {
+          localStorage.setItem('barf_deleted_supp_defs', JSON.stringify([]));
+          renderSuppDropdown();
+      } else {
+        document.getElementById("suppSelect").selectedIndex = 0;
+        onSuppSelectChange();
+      }
     } else {
       inputs.style.display = "none";
       btnAdd.style.display = "block";
@@ -697,14 +797,14 @@
     let name = document.getElementById("newSuppName").value.trim();
     let dose = parseFloat(document.getElementById("newSuppDose").value) || 0;
     let pack = parseFloat(document.getElementById("newSuppPack").value) || 100;
-    if(!name || dose <= 0) return alert("Kérlek add meg a nevét és a napi adagot!");
+    if(!name || dose <= 0) return alert(tr('missingNameOrDose') || "Please provide a name and valid daily dose!");
 
-    let newDef = { defId: 'cust_' + Date.now(), name: '➕ ' + name, defaultDose: dose, defaultPack: pack, unit: 'g/ml', szorzo: 30, desc: 'Saját kiegészítő.' };
+    let newDef = { defId: 'cust_' + Date.now(), name: '➕ ' + name, defaultDose: dose, defaultPack: pack, unit: 'g/ml' };
     customSuppDefs.push(newDef);
     saveCustomSuppDefs();
 
     // Hozzá is adjuk az aktív listához
-    activeSupps.push({ instId: 'inst_' + Date.now(), defId: newDef.defId, name: newDef.name, dose: dose, pack: pack, unit: newDef.unit, szorzo: 30, isManual: true, desc: newDef.desc });
+    activeSupps.push({ instId: 'inst_' + Date.now(), defId: newDef.defId, name: newDef.name, dose: dose, pack: pack, unit: newDef.unit, freq: 7, isManual: true, price: '' });
     saveActiveSupps();
     
     // Mezők ürítése és frissítés
@@ -726,14 +826,14 @@
 
     if(baseSuppLibrary[val]) {
       def = baseSuppLibrary[val];
-      dose = def.calcDose(weight); pack = def.defPack; unit = def.unit; szorzo = def.szorzo; desc = def.desc; name = def.name;
+      dose = def.calcDose(weight); pack = def.defPack; unit = def.unit; freq = def.freq; name = def.name;
     } else {
       def = customSuppDefs.find(c => c.defId === val);
       if(!def) return;
-      dose = def.defaultDose; pack = def.defaultPack; unit = def.unit; szorzo = def.szorzo; desc = def.desc; name = def.name;
+      dose = def.defaultDose; pack = def.defaultPack; unit = def.unit; freq = def.freq; name = def.name;
     }
 
-    activeSupps.push({ instId: 'inst_' + Date.now(), defId: val, name: name, dose: dose, pack: pack, unit: unit, szorzo: szorzo, isManual: false, desc: desc });
+    activeSupps.push({ instId: 'inst_' + Date.now(), defId: val, name: name, dose: dose, pack: pack, unit: unit, freq: freq, isManual: false, price: '' });
     saveActiveSupps();
     renderActiveSupps();
     updateResults();
@@ -755,6 +855,8 @@
       if (newDose !== supp.dose) { supp.isManual = true; } // Ha kézzel belenyúlt, onnantól nem számoljuk újra a súllyal!
       supp.dose = newDose;
       supp.pack = parseFloat(document.getElementById(`pack_${instId}`).value) || supp.pack;
+      supp.freq = parseInt(document.getElementById(`freq_${instId}`).value) || 7;
+      supp.price = document.getElementById(`price_${instId}`).value;
       saveActiveSupps();
       updateResults();
     }
@@ -781,12 +883,26 @@
       <div class="supp-card">
         <div class="supp-card-header">
           <span>${s.name}</span>
-          <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="${tr('btnDelLabel')}">🗑️</button>
+          <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="${tr('delTooltip')}">🗑️</button>
         </div>
         <div class="supp-desc">${s.desc}</div>
         <div class="input-row" style="margin-bottom:8px;">
           <div class="col"><label>${tr('customSuppDoseInfo').split(' ')[0]} (${s.unit})</label><input type="number" id="dose_${s.instId}" value="${s.dose}" step="0.1" oninput="onActiveSuppChange('${s.instId}')"></div>
+          <div class="col"><label>${tr('freqLabel')}</label>
+            <select id="freq_${s.instId}" onchange="onActiveSuppChange('${s.instId}')" style="padding: 9px;">
+              <option value="7" ${s.freq===7?'selected':''}>${tr('freqAll')}</option>
+              <option value="6" ${s.freq===6?'selected':''}>${tr('freq6')}</option>
+              <option value="5" ${s.freq===5?'selected':''}>${tr('freq5')}</option>
+              <option value="4" ${s.freq===4?'selected':''}>${tr('freq4')}</option>
+              <option value="3" ${s.freq===3?'selected':''}>${tr('freq3')}</option>
+              <option value="2" ${s.freq===2?'selected':''}>${tr('freq2')}</option>
+              <option value="1" ${s.freq===1?'selected':''}>${tr('freq1')}</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-row" style="margin-bottom:8px;">
           <div class="col"><label>${tr('customSuppPackInfo').split(' ')[0]} (${s.unit})</label><input type="number" id="pack_${s.instId}" value="${s.pack}" step="10" oninput="onActiveSuppChange('${s.instId}')"></div>
+          <div class="col"><label style="color:var(--accent);">${tr('pricePerBox')} (${tr('currency')})</label><input type="number" id="price_${s.instId}" value="${s.price || ''}" placeholder="${tr('optional')}" step="100" oninput="onActiveSuppChange('${s.instId}')"></div>
         </div>
         <div class="supp-stats" id="stat_${s.instId}">-</div>
       </div>`;
@@ -867,28 +983,58 @@
     const isFasting = document.getElementById("isFasting").checked;
     const isFishDay = document.getElementById("isFishDay").checked;
     
-    const days = [
-        { name: tr('monday'), task: tr('taskBarfMenuSupp') },
-        { name: tr('tuesday'), task: tr('taskBarfMenuEgg') },
-        { name: tr('wednesday'), task: tr('taskBarfMenuSupp') },
-        { name: tr('thursday'), task: tr('taskBarfMenuNoSupp') },
-        { name: tr('friday'), task: isFishDay ? tr('taskFishMenu') : tr('taskBarfMenuSupp') },
-        { name: tr('saturday'), task: tr('taskBarfMenuEgg') },
-        { name: tr('sunday'), task: isFasting ? tr('taskFasting') : tr('taskBarfMenuNoSupp') }
-    ];
-
+    const calSuppDays = {
+      7: [0, 1, 2, 3, 4, 5, 6],
+      6: [0, 1, 2, 3, 4, 5],
+      5: [0, 1, 3, 4, 5],
+      4: [0, 2, 4, 5],
+      3: [0, 2, 4],
+      2: [1, 4],
+      1: [2]
+    };
+    
+    const dayNames = [tr('monday'), tr('tuesday'), tr('wednesday'), tr('thursday'), tr('friday'), tr('saturday'), tr('sunday')];
     let html = "";
-    days.forEach(d => {
-        let isFast = d.task.includes("Koplaló"); let isFish = d.task.includes("Halas");
+    
+    for (let i = 0; i < 7; i++) {
+        let isFast = isFasting && (i === 6); // Sunday is fasting
+        let isFish = isFishDay && (i === 2); // Wednesday is fish day
+
         let borderCol = isFast ? "var(--danger)" : (isFish ? "var(--info)" : "var(--card-border)");
         let bgCol = isFast ? "rgba(239, 68, 68, 0.1)" : (isFish ? "rgba(59, 130, 246, 0.1)" : "rgba(0,0,0,0.25)");
-        html += `<div class="cal-day" style="border-color:${borderCol}; background:${bgCol}"><div class="cal-day-title">${d.name}</div><div class="cal-day-task">${d.task}</div></div>`;
-    });
+        
+        let menuStr = "";
+        
+        if (isFast) {
+            menuStr = `${tr('menuFastBase')}<br><span style='color:var(--danger)'>(Pocak pihen)</span>`;
+        } else {
+            let baseMenuText = isFish ? tr('menuFishBase') : tr('menuBarfBase');
+            let suppsToday = [];
+            
+            activeSupps.forEach(s => {
+                let freq = parseInt(s.freq) || 7;
+                if (calSuppDays[freq] && calSuppDays[freq].includes(i)) {
+                    suppsToday.push(s.name);
+                }
+            });
+            
+            if (suppsToday.length > 0) {
+                // If there are supplements, list them with info color
+                let suppsHtml = suppsToday.map(name => `<span style='color:var(--info)'>+ ${name}</span>`).join('<br>');
+                menuStr = `${baseMenuText}<br>${suppsHtml}`;
+            } else {
+                menuStr = `${baseMenuText}<br><span style='color:var(--text-muted)'>${tr('noSuppsHere')}</span>`;
+            }
+        }
+        
+        html += `<div class="cal-day" style="border-color:${borderCol}; background:${bgCol}"><div class="cal-day-title">${dayNames[i]}</div><div class="cal-day-task">${menuStr}</div></div>`;
+    }
+    
     document.getElementById("calendarGrid").innerHTML = html;
   }
 
   function updateResults() {
-    let totalAllati = 0, totalRost = 0;
+    let totalAllati = 0, totalRost = 0, totalCost = 0;
     const weight = parseFloat(document.getElementById("dogWeight").value) || 0;
     const percent = parseFloat(document.getElementById("dogPercent").value) || 0;
     const baseGrams = Math.round(weight * (percent / 100) * 1000);
@@ -904,6 +1050,7 @@
     config.forEach((item, i) => {
       const adag = parseFloat(document.getElementById(`adag_${i}`).value) || 0;
       const kisz = parseFloat(document.getElementById(`kisz_${i}`).value) || 0;
+      const pricePerKg = parseFloat(document.getElementById(`price_${i}`)?.value) || 0;
       
       if (i === 5) totalRost += adag; else totalAllati += adag;
       let currentPercent = baseGrams > 0 ? ((adag / baseGrams) * 100).toFixed(1) : 0;
@@ -912,6 +1059,13 @@
       const haviKg = (adag * daysInMonth) / 1000;
       const csomagDb = kisz > 0 ? Math.ceil(haviKg / kisz) : 0;
       const kitartNap = adag > 0 ? Math.floor((kisz * 1000) / adag) : 0;
+      
+      const costPerPack = pricePerKg * kisz;
+      const haviKoltsegHús = csomagDb * costPerPack; // csomag árral számolunk a boltban
+      totalCost += haviKoltsegHús;
+
+      const ppEl = document.getElementById(`pack_price_${i}`);
+      if(ppEl) ppEl.innerText = costPerPack > 0 ? `${costPerPack.toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')}` : `0 ${tr('currency')}`;
 
       document.getElementById(`res_${i}`).innerHTML = `
         <div class="meat-stat-box"><span class="meat-stat-lbl">${daysInMonth} ${tr('daysStr')}</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
@@ -921,15 +1075,16 @@
 
       if(haviKg > 0) {
         let selName = document.getElementById(`sel_${i}`).value;
+        let priceText = pricePerKg > 0 ? ` (~${Math.round(haviKoltsegHús).toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')})` : "";
         htmlList += `<div class="sl-item"><span>${selName}</span> <b>${haviKg.toFixed(2)} kg</b></div>`;
-        textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg)\n`;
+        textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg)${priceText}\n`;
       }
     });
 
     // 100% Ellenőrző
     const targetSum = animalIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
     document.getElementById("totalGramsMain").innerText = `${totalAllati} g`;
-    document.getElementById("totalGramsSub").innerText = `+ ${totalRost} g`;
+    document.getElementById("totalGramsSub").innerText = `${tr('totalSub')} ${totalRost} g`;
 
     const summaryCard = document.getElementById("totalSummaryCard"); const warningText = document.getElementById("warningText");
     if (targetSum !== 100 || (Math.abs(totalAllati - baseGrams) > 2)) { summaryCard.classList.add("error-state"); warningText.style.display = "block"; } 
@@ -940,19 +1095,35 @@
     // 2. Aktív Kiegészítők Kalkulációja a Vásárlólistára
     textList += `\n${tr('supps')}:\n`;
     activeSupps.forEach(s => {
-      let haviAdag = s.dose * s.szorzo; 
+      // Havi szükséglet = napi adag * heti gyakoriság * hetek száma (vagyis havonta hányszor adja)
+      // Egy hónapban kb 4.3 hét van
+      let effFreq = parseInt(s.freq) || 7;
+      if (isFasting && effFreq === 7) effFreq = 6;
+      let haviAdagSzam = Math.round(effFreq * (daysInMonth / (isFasting ? 6 : 7)));
+      let haviAdag = Math.round((s.dose * haviAdagSzam) * 10) / 10; 
       let db = s.pack > 0 ? Math.ceil(haviAdag / s.pack) : 0;
+      
+      let pricePerPack = parseFloat(s.price) || 0;
+      let haviKoltsegSupp = db * pricePerPack;
+      totalCost += haviKoltsegSupp;
       
       let statEl = document.getElementById(`stat_${s.instId}`);
       if(statEl) {
-        statEl.innerHTML = `${tr('monthlyNeed')}: <b>${haviAdag} ${s.unit}</b> <span style="float:right;">${tr('buy')}: <b style="color:#fff">${db} db</b></span>`;
+        let priceHtml = pricePerPack > 0 ? `<br>${tr('costLabel')}: ${haviKoltsegSupp.toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')}` : "";
+        statEl.innerHTML = `<div>${tr('monthlyNeed')}: <b>${haviAdag} ${s.unit}</b>${priceHtml}</div> <div style="text-align:right;">${tr('buy')}: <b style="color:#fff; font-size:14px;">${db} db</b></div>`;
       }
 
       if(haviAdag > 0) {
+        let priceText = pricePerPack > 0 ? ` (~${haviKoltsegSupp.toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')})` : "";
         htmlList += `<div class="sl-item sl-item-supp"><span>${s.name}</span> <b>${db} db (${s.pack}${s.unit})</b></div>`;
-        textList += `- ${s.name}: ${db} db (${s.pack}${s.unit})\n`;
+        textList += `- ${s.name}: ${db} db (${s.pack}${s.unit})${priceText}\n`;
       }
     });
+
+    if(totalCost > 0) {
+      htmlList += `<div class="sl-total"><span>${tr('monthlyEstimateLabel')}</span> <span>${Math.round(totalCost).toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')}</span></div>`;
+      textList += `\n==========================\n${tr('monthlyEstimateSummaryText')}: ${Math.round(totalCost).toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')}\n`;
+    }
 
     document.getElementById("shoppingListHtml").innerHTML = htmlList;
     window.currentShoppingListText = textList;
@@ -961,7 +1132,7 @@
   function copyShopping() {
     if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(window.currentShoppingListText); } 
     else { let t = document.createElement("textarea"); t.value = window.currentShoppingListText; t.style.position = "fixed"; t.style.left = "-999999px"; document.body.appendChild(t); t.focus(); t.select(); try { document.execCommand('copy'); } catch (err) {} t.remove(); }
-    const btn = document.getElementById("copyBtn"); btn.innerText = "✅ Lista Sikeresen Másolva!"; btn.style.background = "var(--info)"; setTimeout(() => { btn.innerText = "📋 Lista Másolása (Boltosnak)"; btn.style.background = "var(--success)"; }, 2500);
+    const btn = document.getElementById("copyBtn"); btn.innerText = tr('copyListAction'); btn.style.background = "var(--info)"; setTimeout(() => { btn.innerText = "📋 " + tr('btnCopyList'); btn.style.background = "var(--success)"; }, 2500);
   }
 
   // --- SAJÁT HÚSOK KEZELÉSE ---
@@ -985,6 +1156,13 @@
             deleted.push(val);
             localStorage.setItem('premium_barf_meat_deleted_' + catId, JSON.stringify(deleted));
         }
+    } else if (val === "restore") {
+        if (confirm(tr('restoreConfirm'))) {
+            localStorage.setItem('premium_barf_meat_deleted_' + catId, JSON.stringify([]));
+            sel.value = "";
+        } else {
+            sel.selectedIndex = 0;
+        }
     }
     renderMeatSelect(index, catId);
   }
@@ -996,6 +1174,7 @@
     let optsHTML = validOptions.map(o => `<option value="${o}">${o}</option>`).join('');
     if (customOpts.length > 0) optsHTML += `<optgroup label="${tr('customMeatGroupLabel')}">` + customOpts.map(o => `<option value="${o}">${o}</option>`).join('') + `</optgroup>`;
     optsHTML += `<option value="egyeb">${tr('addOtherLabel')}</option>`;
+    if (deletedOpts.length > 0) optsHTML += `<option value="restore">${tr('restoreDeleted')}</option>`;
     sel.innerHTML = optsHTML; 
     
     if (selectedValue && [...validOptions, ...customOpts].includes(selectedValue)) {
@@ -1011,6 +1190,7 @@
     const sel = document.getElementById(`sel_${index}`); const group = document.getElementById(`custom_group_${index}`); const delBtn = document.getElementById(`del_custom_${index}`); const catId = config[index].id; const customOpts = getMeatCustomOptions(catId);
     if(sel.value === "egyeb") { group.style.display = "flex"; document.getElementById(`custom_${index}`).focus(); } else { group.style.display = "none"; }
     if(sel.value && sel.value !== "egyeb") { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
+    loadMeatPrice(index);
     updateResults(); // Azonnali frissítés a bevásárlólistán
   }
 </script>
