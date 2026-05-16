@@ -638,10 +638,13 @@
 
   // A Legördülő Menü Generálása a kiegészítőknél
   function renderSuppDropdown() {
+    let deletedSupps = JSON.parse(localStorage.getItem('barf_deleted_supp_defs') || '[]');
     let sel = document.getElementById("suppSelect");
     let html = `<optgroup label="Alap Kiegészítők">`;
     for(let key in baseSuppLibrary) {
-      html += `<option value="${key}">${baseSuppLibrary[key].name}</option>`;
+      if(!deletedSupps.includes(key)) {
+        html += `<option value="${key}">${baseSuppLibrary[key].name}</option>`;
+      }
     }
     html += `</optgroup>`;
 
@@ -669,8 +672,7 @@
     } else {
       inputs.style.display = "none";
       btnAdd.style.display = "block";
-      // Törlés gomb csak saját mentett kiegészítőnél látszik
-      btnDel.style.display = val.startsWith("cust_") ? "inline-block" : "none";
+      btnDel.style.display = "inline-block";
     }
   }
 
@@ -680,8 +682,14 @@
     if(val.startsWith("cust_")) {
       customSuppDefs = customSuppDefs.filter(c => c.defId !== val);
       saveCustomSuppDefs();
-      renderSuppDropdown();
+    } else if (val && val !== "new") {
+      let deletedSupps = JSON.parse(localStorage.getItem('barf_deleted_supp_defs') || '[]');
+      if(!deletedSupps.includes(val)) {
+        deletedSupps.push(val);
+        localStorage.setItem('barf_deleted_supp_defs', JSON.stringify(deletedSupps));
+      }
     }
+    renderSuppDropdown();
   }
 
   // Új Kiegészítő Mentése és Hozzáadása
@@ -958,6 +966,8 @@
 
   // --- SAJÁT HÚSOK KEZELÉSE ---
   function getMeatCustomOptions(catId) { const saved = localStorage.getItem('premium_barf_meat_' + catId); return saved ? JSON.parse(saved) : []; }
+  function getMeatDeletedOptions(catId) { const saved = localStorage.getItem('premium_barf_meat_deleted_' + catId); return saved ? JSON.parse(saved) : []; }
+  
   function saveMeatCustomOption(index, catId) {
     const input = document.getElementById(`custom_${index}`); const newVal = input.value.trim(); if (!newVal) return;
     let saved = getMeatCustomOptions(catId); if (!saved.includes(newVal)) { saved.push(newVal); localStorage.setItem('premium_barf_meat_' + catId, JSON.stringify(saved)); }
@@ -965,21 +975,42 @@
   }
   function deleteMeatCustomOption(index, catId) {
     const sel = document.getElementById(`sel_${index}`); const val = sel.value;
-    let saved = getMeatCustomOptions(catId); saved = saved.filter(item => item !== val);
-    localStorage.setItem('premium_barf_meat_' + catId, JSON.stringify(saved)); renderMeatSelect(index, catId);
+    let saved = getMeatCustomOptions(catId); 
+    if(saved.includes(val)) {
+        saved = saved.filter(item => item !== val);
+        localStorage.setItem('premium_barf_meat_' + catId, JSON.stringify(saved));
+    } else if (val && val !== "egyeb") {
+        let deleted = getMeatDeletedOptions(catId);
+        if(!deleted.includes(val)) {
+            deleted.push(val);
+            localStorage.setItem('premium_barf_meat_deleted_' + catId, JSON.stringify(deleted));
+        }
+    }
+    renderMeatSelect(index, catId);
   }
   function renderMeatSelect(index, catId, selectedValue = null) {
     const sel = document.getElementById(`sel_${index}`); const customOpts = getMeatCustomOptions(catId);
-    let optsHTML = config[index].options.map(o => `<option value="${o}">${o}</option>`).join('');
+    const deletedOpts = getMeatDeletedOptions(catId);
+    let validOptions = config[index].options.filter(o => !deletedOpts.includes(o));
+
+    let optsHTML = validOptions.map(o => `<option value="${o}">${o}</option>`).join('');
     if (customOpts.length > 0) optsHTML += `<optgroup label="${tr('customMeatGroupLabel')}">` + customOpts.map(o => `<option value="${o}">${o}</option>`).join('') + `</optgroup>`;
     optsHTML += `<option value="egyeb">${tr('addOtherLabel')}</option>`;
-    sel.innerHTML = optsHTML; if (selectedValue) sel.value = selectedValue; else if (!sel.value && sel.options.length > 0) sel.value = sel.options[0].value;
+    sel.innerHTML = optsHTML; 
+    
+    if (selectedValue && [...validOptions, ...customOpts].includes(selectedValue)) {
+        sel.value = selectedValue; 
+    } else if (!sel.value && sel.options.length > 0 && sel.options[0].value !== 'egyeb') {
+        sel.value = sel.options[0].value;
+    } else if (!sel.value && sel.options.length > 1) { 
+        sel.value = sel.options[0].value;
+    }
     checkMeatCustom(index);
   }
   function checkMeatCustom(index) {
     const sel = document.getElementById(`sel_${index}`); const group = document.getElementById(`custom_group_${index}`); const delBtn = document.getElementById(`del_custom_${index}`); const catId = config[index].id; const customOpts = getMeatCustomOptions(catId);
     if(sel.value === "egyeb") { group.style.display = "flex"; document.getElementById(`custom_${index}`).focus(); } else { group.style.display = "none"; }
-    if(customOpts.includes(sel.value)) { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
+    if(sel.value && sel.value !== "egyeb") { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
     updateResults(); // Azonnali frissítés a bevásárlólistán
   }
 </script>
