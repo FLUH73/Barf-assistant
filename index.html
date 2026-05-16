@@ -30,7 +30,22 @@
     overflow-x: hidden;
   }
 
-  .container { max-width: 1450px; margin: 0 auto; width: 100%; }
+  .container { max-width: 1450px; margin: 0 auto; width: 100%; position: relative; }
+  
+  .lang-selector-container {
+    position: absolute;
+    top: 0px;
+    right: 10px;
+  }
+  .lang-selector-container select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    cursor: pointer;
+    font-weight: 600;
+  }
 
   h1 {
     text-align: center; font-size: 26px; font-weight: 900;
@@ -158,7 +173,13 @@
 <body>
 
 <div class="container">
-  <h1>Szakmai BARF Asszisztens</h1>
+  <div class="lang-selector-container">
+    <select id="langSelect" onchange="changeLanguage()">
+      <option value="hu">🇭🇺 Magyar</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+  </div>
+  <h1 data-loc="title">Szakmai BARF Asszisztens</h1>
 
   <div class="app-layout">
     
@@ -293,6 +314,231 @@
 </div>
 
 <script>
+  let currentLang = 'hu';
+  const translations = {
+    hu: {
+      title: "Szakmai BARF Asszisztens",
+      profileTitle: "Kutya Fajta és Profilja",
+      profileCustom: "⚙️ Egyéni százalék megadása...",
+      profileAdult: "Felnőtt Kutyák",
+      profileA1: "🐕 Felnőtt, Közepes/Nagytestű (Átlagos 2%)",
+      profileA2: "🐕 Felnőtt, Kistestű fajta (Gyors anyagcsere 3%)",
+      profileA3: "🏃 Felnőtt, Sport / Munkakutya (3.5 - 4%)",
+      profileA4: "🦥 Felnőtt, Idős / Ivartalanított hízékony (1.5%)",
+      profilePuppy: "Kölykök és Növendékek",
+      profileP1: "🍼 Kölyök (2-6 hó) - Nagytestű (Lassú növ. 6%)",
+      profileP2: "🍼 Kölyök (2-6 hó) - Kistestű (Gyors 8%)",
+      profileP3: "🐶 Növendék (6-12 hónapos) (4%)",
+      weightLabel: "Testsúly (kg)",
+      doseLabel: "Napi adag (%)",
+      fastingCheck: "<b>Heti 1 koplalónapot tartunk.</b> <br><small>(Vásárlólista: 26 nap)</small>",
+      fishCheck: "<b>Heti 1 halas menü tartása.</b>",
+      ratioTitle: "BARF Arányok (Max 100%)",
+      boneLabel: "Csontos % <br><span style='color:var(--text-muted); font-size:10px; font-weight:normal;'>(20% adja ki a 10% tiszta csontot)</span>",
+      menuLabel: "Fő Menü / Hús %",
+      muscleLabel: "Tiszta Izomhús %",
+      liverLabel: "Máj %",
+      organLabel: "Egyéb Belsőség %",
+      veggieLabel: "🥒 Rost / Zöldség %",
+      totalBowl: "Tálba kerül (Hús/Belsőség/Csont)",
+      totalSub: "+ Rost kiegészítés:",
+      warningText: "⚠️ Állítsd a csúszkákat pontosan 100%-ra!",
+      calTitle: "📅 Heti Etetési Naptár & Emlékeztető",
+      suppTitle: "💊 Kiegészítők a Menühöz",
+      addSuppLabel: "➕ Kiegészítő Hozzáadása",
+      btnAddPredef: "Hozzáadás a menühöz",
+      customSuppLabel: "Saját kiegészítő adatai:",
+      customSuppNameInfo: "Név (pl. Kurkuma)",
+      customSuppDoseInfo: "Napi adag (g/ml)",
+      customSuppPackInfo: "Kiszerelés (g/ml)",
+      btnSaveAdd: "Mentés és Hozzáadás",
+      shopListTitle: "🛒 Havi Vásárlólista",
+      btnCopyList: "📋 Lista Másolása (Boltosnak)",
+      btnCopySuccess: "✅ Lista Sikeresen Másolva!",
+      hasLiverCb: "Tartalmaz májat/belsőséget",
+      dailyG: "Napi (g)",
+      shopKg: "Bolt (kg)",
+      noSupps: "Nincs kiegészítő hozzáadva a menühöz.",
+      shopListHeader: "🛒 BARF VÁSÁRLÓLISTA (1 HÓNAPRA)",
+      weight: "Testsúly",
+      dose: "Adag",
+      days: "Napok",
+      supps: "KIEGÉSZÍTŐK",
+      meats: "HÚSOK / MENÜK",
+      buy: "Vásárolj",
+      packLasts: "1 cs. tart",
+      monthlyNeed: "Havi szükséglet",
+      daysStr: "nap",
+      newValLabel: "Új név...",
+      btnSaveLabel: "Mentés",
+      btnDelLabel: "🗑️",
+      addOtherLabel: "➕ Egyéb (Új hozzáadása)...",
+      customMeatGroupLabel: "Saját mentett húsok",
+      meatLabel_0: "1. Csontos hús",
+      meatLabel_1: "2. Fő Hús / Kész Menü",
+      meatLabel_2: "3. Tiszta Izomhús",
+      meatLabel_3: "4. Tiszta Máj",
+      meatLabel_4: "5. Egyéb Belsőség",
+      meatLabel_5: "6. Zöldség / Rost",
+      monday: "Hétfő", tuesday: "Kedd", wednesday: "Szerda", thursday: "Csütörtök", friday: "Péntek", saturday: "Szombat", sunday: "Vasárnap",
+      taskBarfMenuSupp: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>",
+      taskBarfMenuEgg: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>",
+      taskBarfMenuNoSupp: "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>",
+      taskFishMenu: "🐟 Halas Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>",
+      taskFasting: "🍽️ Koplalónap<br><span style='color:var(--danger)'>(Pocak pihen)</span>"
+    },
+    en: {
+      title: "Pro BARF Assistant",
+      profileTitle: "Dog Breed and Profile",
+      profileCustom: "⚙️ Custom percentage...",
+      profileAdult: "Adult Dogs",
+      profileA1: "🐕 Adult, Medium/Large Breed (Average 2%)",
+      profileA2: "🐕 Adult, Small Breed (Fast metabolism 3%)",
+      profileA3: "🏃 Adult, Sport / Working Dog (3.5 - 4%)",
+      profileA4: "🦥 Adult, Senior / Neutered gaining weight (1.5%)",
+      profilePuppy: "Puppies and Juniors",
+      profileP1: "🍼 Puppy (2-6 mo) - Large Breed (Slow growth 6%)",
+      profileP2: "🍼 Puppy (2-6 mo) - Small Breed (Fast 8%)",
+      profileP3: "🐶 Junior (6-12 months) (4%)",
+      weightLabel: "Weight (kg)",
+      doseLabel: "Daily dose (%)",
+      fastingCheck: "<b>1 fasting day per week.</b> <br><small>(Shopping list: 26 days)</small>",
+      fishCheck: "<b>1 fish menu per week.</b>",
+      ratioTitle: "BARF Ratios (Max 100%)",
+      boneLabel: "Raw Meaty Bones % <br><span style='color:var(--text-muted); font-size:10px; font-weight:normal;'>(20% equals 10% pure bone)</span>",
+      menuLabel: "Main Menu / Meat %",
+      muscleLabel: "Pure Muscle Meat %",
+      liverLabel: "Liver %",
+      organLabel: "Other Organs %",
+      veggieLabel: "🥒 Fiber / Veggies %",
+      totalBowl: "In the Bowl (Meat/Organs/Bone)",
+      totalSub: "+ Fiber supplement:",
+      warningText: "⚠️ Set sliders to exactly 100%!",
+      calTitle: "📅 Weekly Feeding Calendar & Reminder",
+      suppTitle: "💊 Supplements for the Menu",
+      addSuppLabel: "➕ Add Supplement",
+      btnAddPredef: "Add to Menu",
+      customSuppLabel: "Custom Supplement Details:",
+      customSuppNameInfo: "Name (e.g., Turmeric)",
+      customSuppDoseInfo: "Daily dose (g/ml)",
+      customSuppPackInfo: "Packaging (g/ml)",
+      btnSaveAdd: "Save & Add",
+      shopListTitle: "🛒 Monthly Shopping List",
+      btnCopyList: "📋 Copy List",
+      btnCopySuccess: "✅ List Copied Successfully!",
+      hasLiverCb: "Contains liver/organs",
+      dailyG: "Daily (g)",
+      shopKg: "Buy (kg)",
+      noSupps: "No supplements added to the menu.",
+      shopListHeader: "🛒 BARF SHOPPING LIST (1 MONTH)",
+      weight: "Weight",
+      dose: "Dose",
+      days: "Days",
+      supps: "SUPPLEMENTS",
+      meats: "MEATS / MENUS",
+      buy: "Buy",
+      packLasts: "1 pack lasts",
+      monthlyNeed: "Monthly need",
+      daysStr: "days",
+      newValLabel: "New name...",
+      btnSaveLabel: "Save",
+      btnDelLabel: "🗑️",
+      addOtherLabel: "➕ Other (Add new)...",
+      customMeatGroupLabel: "My saved meats",
+      meatLabel_0: "1. Raw Meaty Bones",
+      meatLabel_1: "2. Main Menu / Meat",
+      meatLabel_2: "3. Pure Muscle Meat",
+      meatLabel_3: "4. Pure Liver",
+      meatLabel_4: "5. Other Organs",
+      meatLabel_5: "6. Fiber / Veggies",
+      monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday",
+      taskBarfMenuSupp: "🥩 BARF Menu<br><span style='color:var(--info)'>+ Salmon Oil</span>",
+      taskBarfMenuEgg: "🥩 BARF Menu<br><span style='color:var(--accent)'>+ 🥚 Egg</span>",
+      taskBarfMenuNoSupp: "🥩 BARF Menu<br><span style='color:var(--text-muted)'>No Supp.</span>",
+      taskFishMenu: "🐟 Fish Menu<br><span style='color:var(--info)'>+ Salmon Oil</span>",
+      taskFasting: "🍽️ Fasting Day<br><span style='color:var(--danger)'>(Tummy rest)</span>"
+    }
+  };
+
+  function tr(key) { return translations[currentLang][key] || key; }
+
+  function applyLanguageDOM() {
+    document.querySelector('h1[data-loc="title"]').innerText = tr('title');
+    document.getElementById('isFasting').nextElementSibling.innerHTML = tr('fastingCheck');
+    document.getElementById('isFishDay').nextElementSibling.innerHTML = tr('fishCheck');
+    
+    // Update texts in the HTML
+    const sectTitles = document.querySelectorAll('.section-title');
+    if(sectTitles[0]) sectTitles[0].innerText = tr('profileTitle');
+    if(sectTitles[1]) sectTitles[1].innerText = tr('ratioTitle');
+    if(sectTitles[2]) sectTitles[2].innerText = tr('calTitle');
+    if(sectTitles[3]) sectTitles[3].innerText = tr('suppTitle');
+    if(sectTitles[4]) sectTitles[4].innerText = tr('shopListTitle');
+    
+    document.querySelector('label[for="isFasting"]').innerHTML = tr('fastingCheck');
+    document.querySelector('label[for="isFishDay"]').innerHTML = tr('fishCheck');
+    
+    document.querySelector('#totalSummaryCard div:first-child').innerText = tr('totalBowl');
+    document.getElementById('warningText').innerText = tr('warningText');
+    
+    // Buttons
+    document.getElementById('btnAddPredefSupp').innerText = tr('btnAddPredef');
+    document.getElementById('btnDelCustomSupp').title = tr('btnDelLabel');
+    document.getElementById('newSuppInputs').querySelector('label').innerText = tr('customSuppLabel');
+    document.getElementById('newSuppName').placeholder = tr('customSuppNameInfo');
+    document.getElementById('newSuppDose').placeholder = tr('customSuppDoseInfo');
+    document.getElementById('newSuppPack').placeholder = tr('customSuppPackInfo');
+    document.getElementById('newSuppInputs').querySelector('.btn-save').innerText = tr('btnSaveAdd');
+    document.getElementById('copyBtn').innerText = tr('btnCopyList');
+    
+    // Sliders
+    document.querySelector('#val_p_csont').previousSibling.innerHTML = tr('boneLabel');
+    document.querySelector('#val_p_menu').previousSibling.innerHTML = tr('menuLabel');
+    document.querySelector('#val_p_hus').previousSibling.innerHTML = tr('muscleLabel');
+    document.querySelector('#val_p_maj').previousSibling.innerHTML = tr('liverLabel');
+    document.querySelector('#val_p_bels').previousSibling.innerHTML = tr('organLabel');
+    document.querySelector('#val_p_rost').previousSibling.innerHTML = tr('veggieLabel');
+    
+    // Dog Profile options
+    const profileSel = document.getElementById('dogProfile');
+    profileSel.options[0].text = tr('profileCustom');
+    profileSel.querySelector('optgroup[label="Felnőtt Kutyák"], optgroup[label="Adult Dogs"]').label = tr('profileAdult');
+    profileSel.options[1].text = tr('profileA1');
+    profileSel.options[2].text = tr('profileA2');
+    profileSel.options[3].text = tr('profileA3');
+    profileSel.options[4].text = tr('profileA4');
+    profileSel.querySelector('optgroup[label="Kölykök és Növendékek"], optgroup[label="Puppies and Juniors"]').label = tr('profilePuppy');
+    profileSel.options[5].text = tr('profileP1');
+    profileSel.options[6].text = tr('profileP2');
+    profileSel.options[7].text = tr('profileP3');
+    
+    document.querySelector('label:has(+ #dogWeight)').innerText = tr('weightLabel');
+    document.querySelector('label:has(+ #dogPercent)').innerText = tr('doseLabel');
+    
+    document.querySelector('label:has(+ .select-wrapper)').innerText = tr('addSuppLabel');
+
+    // Re-render JS stuff
+    initApp();
+  }
+
+  function changeLanguage() {
+    currentLang = document.getElementById('langSelect').value;
+    localStorage.setItem('barf_lang', currentLang);
+    applyLanguageDOM();
+  }
+
+  // Set initial language from localstorage
+  if (localStorage.getItem('barf_lang')) {
+    currentLang = localStorage.getItem('barf_lang');
+  }
+
+  // Delay language application slightly after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('langSelect').value = currentLang;
+  });
+
+</script>
+<script>
   // ==========================================
   // 1. HÚS KONFIGURÁCIÓK
   // ==========================================
@@ -331,22 +577,22 @@
     const containerHTML = document.getElementById("meat-grid");
     containerHTML.innerHTML = "";
     config.forEach((item, index) => {
-      let checkboxHTML = item.hasCheckbox ? `<div class="checkbox-group"><input type="checkbox" id="isCompleteMenu" onchange="autoFillGrams()" checked><label for="isCompleteMenu">Tartalmaz májat/belsőséget</label></div>` : "";
+      let checkboxHTML = item.hasCheckbox ? `<div class="checkbox-group"><input type="checkbox" id="isCompleteMenu" onchange="autoFillGrams()" checked><label for="isCompleteMenu">${tr('hasLiverCb')}</label></div>` : "";
       containerHTML.innerHTML += `
         <div class="card meat-card">
-          <div class="meat-title"><span>${item.label}</span><span id="perc_${index}" class="badge">0%</span></div>
+          <div class="meat-title"><span>${tr('meatLabel_' + index) || item.label}</span><span id="perc_${index}" class="badge">0%</span></div>
           <div class="select-wrapper">
             <select id="sel_${index}" onchange="checkMeatCustom(${index}); updateResults();" style="flex:1;"></select>
-            <button id="del_custom_${index}" class="btn-del" onclick="deleteMeatCustomOption(${index}, '${item.id}')" title="Törlés">🗑️</button>
+            <button id="del_custom_${index}" class="btn-del" onclick="deleteMeatCustomOption(${index}, '${item.id}')" title="${tr('btnDelLabel')}">🗑️</button>
           </div>
           <div class="custom-group" id="custom_group_${index}">
-            <input type="text" id="custom_${index}" placeholder="Új név...">
-            <button class="btn-save" onclick="saveMeatCustomOption(${index}, '${item.id}')">Mentés</button>
+            <input type="text" id="custom_${index}" placeholder="${tr('newValLabel')}">
+            <button class="btn-save" onclick="saveMeatCustomOption(${index}, '${item.id}')">${tr('btnSaveLabel')}</button>
           </div>
           ${checkboxHTML}
           <div class="input-row">
-            <div class="col"><label>Napi (g)</label><input type="number" id="adag_${index}" oninput="handleManualGram(${index})"></div>
-            <div class="col"><label>Bolt (kg)</label><input type="number" id="kisz_${index}" value="${item.defKisz}" step="0.5" oninput="updateResults()"></div>
+            <div class="col"><label>${tr('dailyG')}</label><input type="number" id="adag_${index}" oninput="handleManualGram(${index})"></div>
+            <div class="col"><label>${tr('shopKg')}</label><input type="number" id="kisz_${index}" value="${item.defKisz}" step="0.5" oninput="updateResults()"></div>
           </div>
           <div class="meat-stats" id="res_${index}"></div>
         </div>
@@ -400,11 +646,11 @@
     html += `</optgroup>`;
 
     if(customSuppDefs.length > 0) {
-      html += `<optgroup label="Saját Kiegészítők">`;
+      html += `<optgroup label="${tr('customMeatGroupLabel').replace('húsok', 'kiegészítők').replace('meats', 'supplements')}">`;
       customSuppDefs.forEach(c => { html += `<option value="${c.defId}">${c.name}</option>`; });
       html += `</optgroup>`;
     }
-    html += `<option value="new">➕ Egyéb (Új hozzáadása)...</option>`;
+    html += `<option value="new">${tr('addOtherLabel')}</option>`;
     sel.innerHTML = html;
     onSuppSelectChange();
   }
@@ -527,19 +773,19 @@
       <div class="supp-card">
         <div class="supp-card-header">
           <span>${s.name}</span>
-          <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="Eltávolítás">🗑️</button>
+          <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="${tr('btnDelLabel')}">🗑️</button>
         </div>
         <div class="supp-desc">${s.desc}</div>
         <div class="input-row" style="margin-bottom:8px;">
-          <div class="col"><label>Napi adag (${s.unit})</label><input type="number" id="dose_${s.instId}" value="${s.dose}" step="0.1" oninput="onActiveSuppChange('${s.instId}')"></div>
-          <div class="col"><label>Kiszerelés (${s.unit})</label><input type="number" id="pack_${s.instId}" value="${s.pack}" step="10" oninput="onActiveSuppChange('${s.instId}')"></div>
+          <div class="col"><label>${tr('customSuppDoseInfo').split(' ')[0]} (${s.unit})</label><input type="number" id="dose_${s.instId}" value="${s.dose}" step="0.1" oninput="onActiveSuppChange('${s.instId}')"></div>
+          <div class="col"><label>${tr('customSuppPackInfo').split(' ')[0]} (${s.unit})</label><input type="number" id="pack_${s.instId}" value="${s.pack}" step="10" oninput="onActiveSuppChange('${s.instId}')"></div>
         </div>
         <div class="supp-stats" id="stat_${s.instId}">-</div>
       </div>`;
     });
     
     if(activeSupps.length === 0) {
-      html = `<div style="text-align:center; padding: 15px; color:var(--text-muted); font-size:12px;">Nincs kiegészítő hozzáadva a menühöz.</div>`;
+      html = `<div style="text-align:center; padding: 15px; color:var(--text-muted); font-size:12px;">${tr('noSupps')}</div>`;
     }
     document.getElementById("active-supps-container").innerHTML = html;
   }
@@ -614,13 +860,13 @@
     const isFishDay = document.getElementById("isFishDay").checked;
     
     const days = [
-        { name: "Hétfő", task: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
-        { name: "Kedd", task: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>" },
-        { name: "Szerda", task: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
-        { name: "Csütörtök", task: "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>" },
-        { name: "Péntek", task: isFishDay ? "🐟 Halas Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" : "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>" },
-        { name: "Szombat", task: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>" },
-        { name: "Vasárnap", task: isFasting ? "🍽️ Koplalónap<br><span style='color:var(--danger)'>(Pocak pihen)</span>" : "🥩 BARF Menü<br><span style='color:var(--text-muted)'>Kieg. nélkül</span>" }
+        { name: tr('monday'), task: tr('taskBarfMenuSupp') },
+        { name: tr('tuesday'), task: tr('taskBarfMenuEgg') },
+        { name: tr('wednesday'), task: tr('taskBarfMenuSupp') },
+        { name: tr('thursday'), task: tr('taskBarfMenuNoSupp') },
+        { name: tr('friday'), task: isFishDay ? tr('taskFishMenu') : tr('taskBarfMenuSupp') },
+        { name: tr('saturday'), task: tr('taskBarfMenuEgg') },
+        { name: tr('sunday'), task: isFasting ? tr('taskFasting') : tr('taskBarfMenuNoSupp') }
     ];
 
     let html = "";
@@ -641,9 +887,9 @@
     const isFasting = document.getElementById("isFasting").checked;
     const daysInMonth = isFasting ? 26 : 30; 
 
-    let textList = `🛒 BARF VÁSÁRLÓLISTA (1 HÓNAPRA)\n`;
-    textList += `Testsúly: ${weight} kg | Adag: ${percent}% | Napok: ${daysInMonth} nap\n\n`;
-    textList += `🥩 HÚSOK / MENÜK:\n`;
+    let textList = `${tr('shopListHeader')}\n`;
+    textList += `${tr('weight')}: ${weight} kg | ${tr('dose')}: ${percent}% | ${tr('days')}: ${daysInMonth} ${tr('daysStr')}\n\n`;
+    textList += `${tr('meats')}:\n`;
     let htmlList = "";
 
     // 1. Húsok kalkulációja
@@ -660,22 +906,22 @@
       const kitartNap = adag > 0 ? Math.floor((kisz * 1000) / adag) : 0;
 
       document.getElementById(`res_${i}`).innerHTML = `
-        <div class="meat-stat-box"><span class="meat-stat-lbl">${daysInMonth} nap</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
-        <div class="meat-stat-box"><span class="meat-stat-lbl">Vásárolj</span><span class="meat-stat-val">${csomagDb} db</span></div>
-        <div class="meat-stat-box"><span class="meat-stat-lbl">1 cs. tart</span><span class="meat-stat-val">${kitartNap} nap</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">${daysInMonth} ${tr('daysStr')}</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">${tr('buy')}</span><span class="meat-stat-val">${csomagDb} db</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">${tr('packLasts')}</span><span class="meat-stat-val">${kitartNap} ${tr('daysStr')}</span></div>
       `;
 
       if(haviKg > 0) {
         let selName = document.getElementById(`sel_${i}`).value;
         htmlList += `<div class="sl-item"><span>${selName}</span> <b>${haviKg.toFixed(2)} kg</b></div>`;
-        textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg-os csomag)\n`;
+        textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg)\n`;
       }
     });
 
     // 100% Ellenőrző
     const targetSum = animalIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
     document.getElementById("totalGramsMain").innerText = `${totalAllati} g`;
-    document.getElementById("totalGramsSub").innerText = `+ Rost kiegészítés: ${totalRost} g`;
+    document.getElementById("totalGramsSub").innerText = `+ ${totalRost} g`;
 
     const summaryCard = document.getElementById("totalSummaryCard"); const warningText = document.getElementById("warningText");
     if (targetSum !== 100 || (Math.abs(totalAllati - baseGrams) > 2)) { summaryCard.classList.add("error-state"); warningText.style.display = "block"; } 
@@ -684,14 +930,14 @@
     updateCalendar();
 
     // 2. Aktív Kiegészítők Kalkulációja a Vásárlólistára
-    textList += `\n💊 KIEGÉSZÍTŐK:\n`;
+    textList += `\n${tr('supps')}:\n`;
     activeSupps.forEach(s => {
       let haviAdag = s.dose * s.szorzo; 
       let db = s.pack > 0 ? Math.ceil(haviAdag / s.pack) : 0;
       
       let statEl = document.getElementById(`stat_${s.instId}`);
       if(statEl) {
-        statEl.innerHTML = `Havi szükséglet: <b>${haviAdag} ${s.unit}</b> <span style="float:right;">Vásárolj: <b style="color:#fff">${db} db</b></span>`;
+        statEl.innerHTML = `${tr('monthlyNeed')}: <b>${haviAdag} ${s.unit}</b> <span style="float:right;">${tr('buy')}: <b style="color:#fff">${db} db</b></span>`;
       }
 
       if(haviAdag > 0) {
@@ -725,8 +971,8 @@
   function renderMeatSelect(index, catId, selectedValue = null) {
     const sel = document.getElementById(`sel_${index}`); const customOpts = getMeatCustomOptions(catId);
     let optsHTML = config[index].options.map(o => `<option value="${o}">${o}</option>`).join('');
-    if (customOpts.length > 0) optsHTML += `<optgroup label="Saját mentett húsok">` + customOpts.map(o => `<option value="${o}">${o}</option>`).join('') + `</optgroup>`;
-    optsHTML += `<option value="egyeb">➕ Egyéb (Új hozzáadása)...</option>`;
+    if (customOpts.length > 0) optsHTML += `<optgroup label="${tr('customMeatGroupLabel')}">` + customOpts.map(o => `<option value="${o}">${o}</option>`).join('') + `</optgroup>`;
+    optsHTML += `<option value="egyeb">${tr('addOtherLabel')}</option>`;
     sel.innerHTML = optsHTML; if (selectedValue) sel.value = selectedValue; else if (!sel.value && sel.options.length > 0) sel.value = sel.options[0].value;
     checkMeatCustom(index);
   }
