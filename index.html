@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>Pro BARF Kalkulátor & Asszisztens</title>
+<link rel="manifest" href="/manifest.json">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
@@ -1265,6 +1266,17 @@
     if(sel.value && sel.value !== "egyeb") { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
     loadMeatPrice(index);
     updateResults(); // Azonnali frissítés a bevásárlólistán
+  }
+
+  // --- Service Worker Registration for PWA ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then((registration) => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, (err) => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
   }
 </script>
 
