@@ -639,7 +639,8 @@
       isFishDay: document.getElementById("isFishDay").checked,
       isCompleteMenu: document.getElementById("isCompleteMenu") ? document.getElementById("isCompleteMenu").checked : true,
       sliders: {},
-      packSizes: {}
+      packSizes: {},
+      meatSelections: {}
     };
     animalIds.forEach(id => {
       let slider = document.getElementById(id);
@@ -652,13 +653,23 @@
       if (kiszEl) {
         settings.packSizes[index] = kiszEl.value;
       }
+      let selEl = document.getElementById("sel_" + index);
+      if (selEl) {
+        settings.meatSelections[index] = selEl.value;
+      }
     });
 
-    localStorage.setItem('barf_settings_v3', JSON.stringify(settings));
+    try {
+      localStorage.setItem('barf_settings_v3', JSON.stringify(settings));
+    } catch(e) {
+      console.warn("Could not save settings", e);
+    }
   }
 
   function loadSettings() {
     let saved = localStorage.getItem('barf_settings_v3');
+    if (!saved) saved = localStorage.getItem('barf_settings_v2');
+    if (!saved) saved = localStorage.getItem('barf_settings');
     if (!saved) return;
     try {
       let settings = JSON.parse(saved);
@@ -684,15 +695,22 @@
         }
       }
       
-      if(settings.packSizes) {
-        config.forEach((item, index) => {
-          if(settings.packSizes[index] !== undefined) {
-             let kiszEl = document.getElementById("kisz_" + index);
-             if (kiszEl) kiszEl.value = settings.packSizes[index];
-          }
-        });
-      }
-    } catch(e) {}
+      config.forEach((item, index) => {
+        if(settings.packSizes && settings.packSizes[index] !== undefined) {
+           let kiszEl = document.getElementById("kisz_" + index);
+           if (kiszEl) kiszEl.value = settings.packSizes[index];
+        }
+        if(settings.meatSelections && settings.meatSelections[index] !== undefined) {
+           let selEl = document.getElementById("sel_" + index);
+           if (selEl) {
+             selEl.value = settings.meatSelections[index];
+             checkMeatCustom(index, true);
+           }
+        }
+      });
+    } catch(e) {
+      console.error("Error loading settings:", e);
+    }
   }
 
   function initApp() {
@@ -728,7 +746,7 @@
       `;
     });
     config.forEach((item, index) => {
-      renderMeatSelect(index, item.id);
+      renderMeatSelect(index, item.id, null, true);
       loadMeatPrice(index);
     });
 
@@ -1240,7 +1258,7 @@
     }
     renderMeatSelect(index, catId);
   }
-  function renderMeatSelect(index, catId, selectedValue = null) {
+  function renderMeatSelect(index, catId, selectedValue = null, isInit = false) {
     const sel = document.getElementById(`sel_${index}`); const customOpts = getMeatCustomOptions(catId);
     const deletedOpts = getMeatDeletedOptions(catId);
     let validOptions = config[index].options.filter(o => !deletedOpts.includes(o));
@@ -1258,15 +1276,24 @@
     } else if (!sel.value && sel.options.length > 1) { 
         sel.value = sel.options[0].value;
     }
-    checkMeatCustom(index);
+    checkMeatCustom(index, isInit);
   }
-  function checkMeatCustom(index) {
+  function checkMeatCustom(index, isInit = false) {
     const sel = document.getElementById(`sel_${index}`); const group = document.getElementById(`custom_group_${index}`); const delBtn = document.getElementById(`del_custom_${index}`); const catId = config[index].id; const customOpts = getMeatCustomOptions(catId);
     if(sel.value === "egyeb") { group.style.display = "flex"; document.getElementById(`custom_${index}`).focus(); } else { group.style.display = "none"; }
     if(sel.value && sel.value !== "egyeb") { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
     loadMeatPrice(index);
-    updateResults(); // Azonnali frissítés a bevásárlólistán
+    if(!isInit) updateResults(); // Azonnali frissítés a bevásárlólistán
   }
+
+  // Megbízhatóbb mentés, amikor az app háttérbe kerül
+  document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === 'hidden') {
+      saveSettings();
+      saveActiveSupps();
+      saveCustomSuppDefs();
+    }
+  });
 
   // --- Service Worker Registration for PWA ---
   if ('serviceWorker' in navigator) {
