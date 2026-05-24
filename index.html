@@ -297,8 +297,18 @@
             <label>Saját kiegészítő adatai:</label>
             <input type="text" id="newSuppName" placeholder="Név (pl. Kurkuma)" style="margin-bottom:8px;">
             <div class="input-row">
-              <div class="col"><input type="number" id="newSuppDose" placeholder="Napi adag (g/ml)" step="0.1"></div>
-              <div class="col"><input type="number" id="newSuppPack" placeholder="Kiszerelés (g/ml)" step="10"></div>
+              <div class="col"><input type="number" id="newSuppDose" placeholder="Napi adag" step="0.1"></div>
+              <div class="col" style="flex: 0.5;">
+                <select id="newSuppUnit" style="padding: 9px; margin-top:0;">
+                  <option value="g">g</option>
+                  <option value="ml">ml</option>
+                  <option value="db">db</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-row" style="margin-top:8px;">
+              <div class="col"><input type="number" id="newSuppPack" placeholder="Kiszer. (üres=nincs)" step="1"></div>
+              <div class="col"><input type="text" id="newSuppDesc" placeholder="Megjegyzés (opcionális)"></div>
             </div>
             <button class="btn-save" style="width:100%; margin-top:10px;" onclick="saveAndAddCustomSupp()">Mentés és Hozzáadás</button>
           </div>
@@ -886,21 +896,25 @@
   function saveAndAddCustomSupp() {
     let name = document.getElementById("newSuppName").value.trim();
     let dose = parseFloat(document.getElementById("newSuppDose").value) || 0;
-    let pack = parseFloat(document.getElementById("newSuppPack").value) || 100;
+    let pack = parseFloat(document.getElementById("newSuppPack").value) || 0;
+    let unit = document.getElementById("newSuppUnit") ? document.getElementById("newSuppUnit").value : 'g/ml';
+    let desc = document.getElementById("newSuppDesc") ? document.getElementById("newSuppDesc").value.trim() : '';
+
     if(!name || dose <= 0) return alert(tr('missingNameOrDose') || "Please provide a name and valid daily dose!");
 
-    let newDef = { defId: 'cust_' + Date.now(), name: '➕ ' + name, defaultDose: dose, defaultPack: pack, unit: 'g/ml' };
+    let newDef = { defId: 'cust_' + Date.now(), name: '➕ ' + name, defaultDose: dose, defaultPack: pack, unit: unit, desc: desc };
     customSuppDefs.push(newDef);
     saveCustomSuppDefs();
 
     // Hozzá is adjuk az aktív listához
-    activeSupps.push({ instId: 'inst_' + Date.now(), defId: newDef.defId, name: newDef.name, dose: dose, pack: pack, unit: newDef.unit, freq: 7, isManual: true, price: '' });
+    activeSupps.push({ instId: 'inst_' + Date.now(), defId: newDef.defId, name: newDef.name, dose: dose, pack: pack, unit: newDef.unit, freq: 7, isManual: true, desc: desc, price: '' });
     saveActiveSupps();
     
     // Mezők ürítése és frissítés
     document.getElementById("newSuppName").value = "";
     document.getElementById("newSuppDose").value = "";
-    document.getElementById("newSuppPack").value = "";
+    if(document.getElementById("newSuppPack")) document.getElementById("newSuppPack").value = "";
+    if(document.getElementById("newSuppDesc")) document.getElementById("newSuppDesc").value = "";
     renderSuppDropdown();
     renderActiveSupps();
     updateResults();
@@ -975,7 +989,7 @@
           <span>${s.name}</span>
           <button class="supp-del-btn" onclick="removeActiveSupp('${s.instId}')" title="${tr('delTooltip')}">🗑️</button>
         </div>
-        <div class="supp-desc">${s.desc}</div>
+        <div class="supp-desc" style="${s.desc ? '' : 'display:none;'}">${s.desc || ''}</div>
         <div class="input-row" style="margin-bottom:8px;">
           <div class="col"><label>${tr('customSuppDoseInfo').split(' ')[0]} (${s.unit})</label><input type="number" id="dose_${s.instId}" value="${s.dose}" step="0.1" oninput="onActiveSuppChange('${s.instId}')"></div>
           <div class="col"><label>${tr('freqLabel')}</label>
@@ -1129,10 +1143,16 @@
     const percent = parseFloat(document.getElementById("dogPercent").value) || 0;
     const baseGrams = Math.round(weight * (percent / 100) * 1000);
     const isFasting = document.getElementById("isFasting").checked;
-    const daysInMonth = isFasting ? 26 : 30; 
+    const isFishDay = document.getElementById("isFishDay").checked;
+    
+    let daysInMonth = 30;
+    if (isFasting) daysInMonth -= 4; // vasárnapi böjt
+    
+    // Hús menü napok (halas nap 1 nap egy héten, tehát havonta 4)
+    const meatDaysInMonth = isFishDay ? daysInMonth - 4 : daysInMonth;
 
     let textList = `${tr('shopListHeader')}\n`;
-    textList += `${tr('weight')}: ${weight} kg | ${tr('dose')}: ${percent}% | ${tr('days')}: ${daysInMonth} ${tr('daysStr')}\n\n`;
+    textList += `${tr('weight')}: ${weight} kg | ${tr('dose')}: ${percent}% | ${tr('days')}: ${meatDaysInMonth} ${tr('daysStr')} (Hús menü)\n\n`;
     textList += `${tr('meats')}:\n`;
     let htmlList = "";
 
@@ -1146,7 +1166,7 @@
       let currentPercent = baseGrams > 0 ? ((adag / baseGrams) * 100).toFixed(1) : 0;
       document.getElementById(`perc_${i}`).innerText = currentPercent + "%";
       
-      const haviKg = (adag * daysInMonth) / 1000;
+      const haviKg = (adag * meatDaysInMonth) / 1000;
       const csomagDb = kisz > 0 ? Math.ceil(haviKg / kisz) : 0;
       const kitartNap = adag > 0 ? Math.floor((kisz * 1000) / adag) : 0;
       
@@ -1158,7 +1178,7 @@
       if(ppEl) ppEl.innerText = costPerPack > 0 ? `${costPerPack.toLocaleString(currentLang === 'hu' ? 'hu-HU' : 'en-US')} ${tr('currency')}` : `0 ${tr('currency')}`;
 
       document.getElementById(`res_${i}`).innerHTML = `
-        <div class="meat-stat-box"><span class="meat-stat-lbl">${daysInMonth} ${tr('daysStr')}</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
+        <div class="meat-stat-box"><span class="meat-stat-lbl">${meatDaysInMonth} ${tr('daysStr')}</span><span class="meat-stat-val">${haviKg.toFixed(2)} kg</span></div>
         <div class="meat-stat-box"><span class="meat-stat-lbl">${tr('buy')}</span><span class="meat-stat-val">${csomagDb} db</span></div>
         <div class="meat-stat-box"><span class="meat-stat-lbl">${tr('packLasts')}</span><span class="meat-stat-val">${kitartNap} ${tr('daysStr')}</span></div>
       `;
@@ -1170,6 +1190,12 @@
         textList += `- ${selName}: ${haviKg.toFixed(2)} kg (${csomagDb} db ${kisz}kg)${priceText}\n`;
       }
     });
+
+    if (isFishDay && baseGrams > 0) {
+      const haviFishKg = (baseGrams * 4) / 1000;
+      htmlList += `<div class="sl-item"><span style="color:var(--info);">🐟 Hal / Halas menü (4 nap)</span> <b>${haviFishKg.toFixed(2)} kg</b></div>`;
+      textList += `- 🐟 Hal / Halas menü (4 napra): ${haviFishKg.toFixed(2)} kg\n`;
+    }
 
     // 100% Ellenőrző
     const targetSum = animalIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
