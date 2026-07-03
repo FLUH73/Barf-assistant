@@ -1338,28 +1338,20 @@
       const pOffal = (barfSum.offal / totalAnimalGramsForMacro * 100).toFixed(1);
       const pTripe = (barfSum.tripe / totalAnimalGramsForMacro * 100).toFixed(1);
       
-      let warnHTML = "";
-      if (pMeat > 75) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Sok az izomhús! (Ideális: 60-70%)</div>";
-      if (pMeat < 50) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Kevés az izomhús! (Ideális: 60-70%)</div>";
-      if (pBone > 18) warnHTML += "<div style='color:var(--danger); margin-top:5px;'>⚠️ Túl sok a csont! (Ideális: 10-15%)</div>";
-      if (pBone < 8) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Kevés a csont! (Ideális: 10-15%)</div>";
-      if (pOffal > 18) warnHTML += "<div style='color:var(--danger); margin-top:5px;'>⚠️ Túl sok a belsőség! (Ideális: 10-15%)</div>";
-      
       macroDiv.innerHTML = `
         <div style="font-weight:bold; margin-bottom:5px; color: var(--text-color);">BARF Valós Analízis (Csak az állati összetevők alapján)</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-          <span>🥩 Tiszta Izomhús:</span> <b style="color: ${pMeat > 75 || pMeat < 50 ? 'var(--warning)' : 'inherit'}">${pMeat}%</b>
+          <span>🥩 Tiszta Izomhús:</span> <b>${pMeat}%</b>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
           <span>🟢 Egyéb (Izomhúsnak számít):</span> <b>${pTripe}%</b>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-          <span>🦴 Tiszta Csont:</span> <b style="color: ${pBone > 18 || pBone < 8 ? 'var(--danger)' : 'inherit'}">${pBone}%</b>
+          <span>🦴 Tiszta Csont:</span> <b>${pBone}%</b>
         </div>
         <div style="display:flex; justify-content:space-between;">
-          <span>🩸 Belsőség:</span> <b style="color: ${pOffal > 18 ? 'var(--danger)' : 'inherit'}">${pOffal}%</b>
+          <span>🩸 Belsőség:</span> <b>${pOffal}%</b>
         </div>
-        ${warnHTML}
       `;
       macroDiv.style.display = "block";
     } else {
