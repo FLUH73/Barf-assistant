@@ -18,6 +18,7 @@
     --success: #10b981;
     --info: #3b82f6;
     --danger: #ef4444;
+    --warning: #f59e0b;
     --input-bg: rgba(15, 23, 42, 0.6);
   }
 
@@ -112,9 +113,10 @@
   .rost-group input[type="range"]::-webkit-slider-thumb { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
 
   /* --- HÚS KÁRTYÁK --- */
-  .meat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-  @media (max-width: 850px) { .meat-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .meat-grid { grid-template-columns: 1fr; } }
+  .meat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+  @media (min-width: 851px) { .meat-card { width: calc((100% - 30px) / 3); } }
+  @media (max-width: 850px) { .meat-card { width: calc((100% - 15px) / 2); } }
+  @media (max-width: 500px) { .meat-card { width: 100%; } }
 
   .meat-card { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
   .meat-title { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: var(--accent); margin-bottom: 10px;}
@@ -227,27 +229,38 @@
         <div class="section-title">BARF Arányok (Max 100%)</div>
         <div class="slider-group">
           <div class="slider-header"><span class="slider-name">Csontos % <br><span style="color:var(--text-muted); font-size:10px; font-weight:normal;">(20% adja ki a 10% tiszta csontot)</span></span><span class="slider-value" id="val_p_csont">20%</span></div>
-          <input type="range" id="p_csont" value="20" min="0" max="100" step="1" oninput="handleSlider('p_csont')">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <input type="range" id="p_csont" value="20" min="0" max="100" step="1" oninput="handleSlider('p_csont')" style="flex:1;">
+            <input type="number" id="num_p_csont" value="20" min="0" max="100" step="1" oninput="document.getElementById('p_csont').value = this.value; handleSlider('p_csont')" style="width: 55px; padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; text-align: center;">
+          </div>
         </div>
         <div class="slider-group">
           <div class="slider-header"><span class="slider-name">Fő Menü / Hús %</span><span class="slider-value" id="val_p_menu">50%</span></div>
-          <input type="range" id="p_menu" value="50" min="0" max="100" step="1" oninput="handleSlider('p_menu')">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <input type="range" id="p_menu" value="50" min="0" max="100" step="1" oninput="handleSlider('p_menu')" style="flex:1;">
+            <input type="number" id="num_p_menu" value="50" min="0" max="100" step="1" oninput="document.getElementById('p_menu').value = this.value; handleSlider('p_menu')" style="width: 55px; padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; text-align: center;">
+          </div>
         </div>
         <div class="slider-group">
           <div class="slider-header"><span class="slider-name">Tiszta Izomhús %</span><span class="slider-value" id="val_p_hus">20%</span></div>
-          <input type="range" id="p_hus" value="20" min="0" max="100" step="1" oninput="handleSlider('p_hus')">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <input type="range" id="p_hus" value="20" min="0" max="100" step="1" oninput="handleSlider('p_hus')" style="flex:1;">
+            <input type="number" id="num_p_hus" value="20" min="0" max="100" step="1" oninput="document.getElementById('p_hus').value = this.value; handleSlider('p_hus')" style="width: 55px; padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; text-align: center;">
+          </div>
         </div>
         <div class="slider-group">
-          <div class="slider-header"><span class="slider-name">Máj %</span><span class="slider-value" id="val_p_maj">5%</span></div>
-          <input type="range" id="p_maj" value="5" min="0" max="100" step="1" oninput="handleSlider('p_maj')">
-        </div>
-        <div class="slider-group">
-          <div class="slider-header"><span class="slider-name">Egyéb Belsőség %</span><span class="slider-value" id="val_p_bels">5%</span></div>
-          <input type="range" id="p_bels" value="5" min="0" max="100" step="1" oninput="handleSlider('p_bels')">
+          <div class="slider-header"><span class="slider-name">Belsőség %</span><span class="slider-value" id="val_p_maj">10%</span></div>
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <input type="range" id="p_maj" value="10" min="0" max="100" step="1" oninput="handleSlider('p_maj')" style="flex:1;">
+            <input type="number" id="num_p_maj" value="10" min="0" max="100" step="1" oninput="document.getElementById('p_maj').value = this.value; handleSlider('p_maj')" style="width: 55px; padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; text-align: center;">
+          </div>
         </div>
         <div class="slider-group rost-group">
           <div class="slider-header"><span class="slider-name">🥒 Rost / Zöldség %</span><span class="slider-value" id="val_p_rost">10%</span></div>
-          <input type="range" id="p_rost" value="10" min="0" max="30" step="1" oninput="handleRostSlider()">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <input type="range" id="p_rost" value="10" min="0" max="30" step="1" oninput="handleRostSlider()" style="flex:1;">
+            <input type="number" id="num_p_rost" value="10" min="0" max="30" step="1" oninput="document.getElementById('p_rost').value = this.value; handleRostSlider()" style="width: 55px; padding: 4px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.5); background: rgba(16,185,129,0.1); color: white; text-align: center;">
+          </div>
         </div>
       </div>
 
@@ -255,7 +268,21 @@
         <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: bold;">Tálba kerül (Hús/Belsőség/Csont)</div>
         <div class="total-main" id="totalGramsMain">0 g</div>
         <div class="total-sub" id="totalGramsSub">+ Rost kiegészítés: 0 g</div>
+        <div id="macroAnalysis" style="margin-top: 15px; font-size: 13px; text-align: left; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px;"></div>
         <div id="warningText" class="warning-text">⚠️ Állítsd a csúszkákat pontosan 100%-ra!</div>
+      </div>
+
+      <div class="card" style="margin-top: 15px; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; padding: 15px;">
+        <div class="section-title" style="color: var(--info); font-size: 11px; margin-bottom: 8px;">📖 BARF Irányelvek</div>
+        <ul style="margin: 0; padding-left: 15px; margin-bottom: 8px;">
+          <li><b style="color:var(--text-main)">Izomhús (60-70%):</b> A menü alapja, fehérjeforrás.</li>
+          <li><b style="color:var(--text-main)">Nyers csontos (10-15%):</b> Kalcium/foszfor forrás. Figyelj, hogy a <span style="color:var(--accent)">tiszta csont</span> 10-15% között maradjon!</li>
+          <li><b style="color:var(--text-main)">Belsőség (10-15%):</b> Vitaminok. Máj kb. 5%.</li>
+          <li><b style="color:var(--text-main)">Zöldség (10-20%):</b> Rostforrás, pépesítve adandó.</li>
+        </ul>
+        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; border-left: 3px solid var(--accent); margin-top: 10px;">
+          <b style="color:var(--accent)">🟢 Zöldpacal (Egyéb):</b> Megoszlanak a vélemények; van, aki <i>rostként</i> (félig emésztett növények), mások <i>izomhúsként</i> (gyomorfal) számolják. Ebben a kalkulátorban <b>izomhúsnak és egyébnek</b> számítjuk a makrókban.
+        </div>
       </div>
 
     </div>
@@ -351,7 +378,7 @@
       boneLabel: "Csontos % <br><span style='color:var(--text-muted); font-size:10px; font-weight:normal;'>(20% adja ki a 10% tiszta csontot)</span>",
       menuLabel: "Fő Menü / Hús %",
       muscleLabel: "Tiszta Izomhús %",
-      liverLabel: "Máj %",
+      liverLabel: "Belsőség %",
       organLabel: "Egyéb Belsőség %",
       veggieLabel: "🥒 Rost / Zöldség %",
       totalBowl: "Tálba kerül (Hús/Belsőség/Csont)",
@@ -412,9 +439,8 @@
       meatLabel_0: "1. Csontos hús",
       meatLabel_1: "2. Fő Hús / Kész Menü",
       meatLabel_2: "3. Tiszta Izomhús",
-      meatLabel_3: "4. Tiszta Máj",
-      meatLabel_4: "5. Egyéb Belsőség",
-      meatLabel_5: "6. Zöldség / Rost",
+      meatLabel_3: "4. Belsőség",
+      meatLabel_4: "5. Zöldség / Rost",
       monday: "Hétfő", tuesday: "Kedd", wednesday: "Szerda", thursday: "Csütörtök", friday: "Péntek", saturday: "Szombat", sunday: "Vasárnap",
       taskBarfMenuSupp: "🥩 BARF Menü<br><span style='color:var(--info)'>+ Lazacolaj</span>",
       taskBarfMenuEgg: "🥩 BARF Menü<br><span style='color:var(--accent)'>+ 🥚 Tojás</span>",
@@ -449,7 +475,7 @@
       boneLabel: "Raw Meaty Bones % <br><span style='color:var(--text-muted); font-size:10px; font-weight:normal;'>(20% equals 10% pure bone)</span>",
       menuLabel: "Main Menu / Meat %",
       muscleLabel: "Pure Muscle Meat %",
-      liverLabel: "Liver %",
+      liverLabel: "Offal %",
       organLabel: "Other Organs %",
       veggieLabel: "🥒 Fiber / Veggies %",
       totalBowl: "In the Bowl (Meat/Organs/Bone)",
@@ -510,9 +536,8 @@
       meatLabel_0: "1. Raw Meaty Bones",
       meatLabel_1: "2. Main Menu / Meat",
       meatLabel_2: "3. Pure Muscle Meat",
-      meatLabel_3: "4. Pure Liver",
-      meatLabel_4: "5. Other Organs",
-      meatLabel_5: "6. Fiber / Veggies",
+      meatLabel_3: "4. Offal",
+      meatLabel_4: "5. Fiber / Veggies",
       monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday",
       taskBarfMenuSupp: "🥩 BARF Menu<br><span style='color:var(--info)'>+ Salmon Oil</span>",
       taskBarfMenuEgg: "🥩 BARF Menu<br><span style='color:var(--accent)'>+ 🥚 Egg</span>",
@@ -563,7 +588,6 @@
     document.querySelector('#val_p_menu').previousSibling.innerHTML = tr('menuLabel');
     document.querySelector('#val_p_hus').previousSibling.innerHTML = tr('muscleLabel');
     document.querySelector('#val_p_maj').previousSibling.innerHTML = tr('liverLabel');
-    document.querySelector('#val_p_bels').previousSibling.innerHTML = tr('organLabel');
     document.querySelector('#val_p_rost').previousSibling.innerHTML = tr('veggieLabel');
     
     // Dog Profile options
@@ -609,16 +633,56 @@
   // ==========================================
   // 1. HÚS KONFIGURÁCIÓK
   // ==========================================
-  const animalIds = ["p_csont", "p_menu", "p_hus", "p_maj", "p_bels"];
+  const animalIds = ["p_csont", "p_menu", "p_hus", "p_maj"];
 
   const config = [
     { id: "csont", labelKey: "meatLabel_0", defKisz: 10, options: ["Pecsenye kacsa farhát darálva", "Pecsenye kacsa farhát (egész)", "Pecsenye kacsa nyak darálva", "Kacsa Menü (csontos nyesedék)", "Pecsenye kacsa láb-szárny", "Pulyka darálék (húsos/csontos)", "Lazac darálva (fej, gerinc)"] },
-    { id: "menu", labelKey: "meatLabel_1", defKisz: 10, options: ["Marha Menü Belsőséggel és Zöldpacallal", "Marha Menü Belsőséggel és Tőggyel", "Szarvas-Bárány Menü", "Szarvas-Marha Menü", "Szarvas-Kacsa Menü", "Kacsa-Marha Menü", "Nyúl-Kacsa Menü", "Marha-Bárány Menü", "Pulyka Menü Szívvel"], hasCheckbox: true },
-    { id: "hus", labelKey: "meatLabel_2", defKisz: 15, options: ["Marha nyesedék darálva", "Pulykaszív", "Lazac hasaalja (1 kg)", "Nyúl darálék (belsőséggel, 2 kg)"] },
-    { id: "maj", labelKey: "meatLabel_3", defKisz: 1, options: ["Marha máj", "Csirkemáj", "Nyúl máj", "Pulykamáj"] },
-    { id: "bels", labelKey: "meatLabel_4", defKisz: 10, options: ["Marha zöldpacal darálva (100%)", "Bárány vegyes belsőség darálva", "Marha lép / vese"] },
-    { id: "rost", labelKey: "meatLabel_5", defKisz: 10, options: ["Pépesített zöldségmix (Répa, Alma, Cukkini)", "Szárított rost keverék"] }
+    { id: "menu", labelKey: "meatLabel_1", defKisz: 10, options: ["Marha Menü Belsőséggel és Zöldpacallal", "Marha Menü Belsőséggel és Tőggyel", "Marha Menü Belsőséggel és Tüdővel", "Marha Menü Gégével és Zöldpacallal", "Pulyka Menü Nyesedékkel", "Szarvas-Bárány Menü", "Szarvas-Marha Menü", "Szarvas-Kacsa Menü", "Kacsa-Marha Menü", "Nyúl-Kacsa Menü", "Marha-Bárány Menü", "Pulyka Menü Szívvel"], hasCheckbox: true },
+    { id: "hus", labelKey: "meatLabel_2", defKisz: 15, options: ["Marha nyesedék darálva", "Pulykaszív", "Lazac hasaalja (1 kg)", "Nyúl darálék (belsőséggel, 2 kg)", "Marha zöldpacal darálva (100%)"] },
+    { id: "maj", labelKey: "meatLabel_3", defKisz: 1, options: ["Marha máj", "Csirkemáj", "Nyúl máj", "Pulykamáj", "Bárány vegyes belsőség darálva", "Marha lép / vese"] },
+    { id: "rost", labelKey: "meatLabel_4", defKisz: 10, options: ["Pépesített zöldségmix (Répa, Alma, Cukkini)", "Szárított rost keverék"] }
   ];
+
+  // ==========================================
+  // BARF ÖSSZETÉTEL ADATBÁZIS (ÚJ)
+  // ==========================================
+  const meatComposition = {
+    // Tiszta alapanyagok
+    "Marha nyesedék darálva": { meat: 100, bone: 0, offal: 0, tripe: 0 },
+    "Pulykaszív": { meat: 100, bone: 0, offal: 0, tripe: 0 },
+    "Marha zöldpacal darálva (100%)": { meat: 0, bone: 0, offal: 0, tripe: 100 },
+    "Lazac hasaalja (1 kg)": { meat: 100, bone: 0, offal: 0, tripe: 0 },
+    "Pecsenye kacsa nyak darálva": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Pecsenye kacsa farhát darálva": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Pecsenye kacsa farhát (egész)": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Pecsenye kacsa láb-szárny": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Pulyka darálék (húsos/csontos)": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Lazac darálva (fej, gerinc)": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Nyúl darálék (belsőséggel, 2 kg)": { meat: 70, bone: 10, offal: 20, tripe: 0 },
+    
+    // Kész menük
+    "Marha Menü Belsőséggel és Zöldpacallal": { meat: 60, bone: 0, offal: 20, tripe: 20 },
+    "Marha Menü Belsőséggel és Tőggyel": { meat: 60, bone: 0, offal: 20, tripe: 20 },
+    "Marha Menü Belsőséggel és Tüdővel": { meat: 60, bone: 0, offal: 20, tripe: 20 },
+    "Marha Menü Gégével és Zöldpacallal": { meat: 50, bone: 25, offal: 0, tripe: 25 },
+    "Szarvas-Bárány Menü": { meat: 60, bone: 0, offal: 20, tripe: 20 },
+    "Szarvas-Marha Menü": { meat: 70, bone: 0, offal: 30, tripe: 0 },
+    "Kacsa Menü (csontos nyesedék)": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Szarvas-Kacsa Menü": { meat: 64, bone: 36, offal: 0, tripe: 0 },
+    "Kacsa-Marha Menü": { meat: 64, bone: 36, offal: 0, tripe: 0 },
+    "Nyúl-Kacsa Menü": { meat: 64, bone: 36, offal: 0, tripe: 0 },
+    "Marha-Bárány Menü": { meat: 50, bone: 20, offal: 20, tripe: 10 },
+    "Pulyka Menü Szívvel": { meat: 70, bone: 30, offal: 0, tripe: 0 },
+    "Pulyka Menü Nyesedékkel": { meat: 60, bone: 30, offal: 10, tripe: 10 },
+
+    // Belsőségek
+    "Marha máj": { meat: 0, bone: 0, offal: 100, tripe: 0 },
+    "Csirkemáj": { meat: 0, bone: 0, offal: 100, tripe: 0 },
+    "Nyúl máj": { meat: 0, bone: 0, offal: 100, tripe: 0 },
+    "Pulykamáj": { meat: 0, bone: 0, offal: 100, tripe: 0 },
+    "Bárány vegyes belsőség darálva": { meat: 0, bone: 0, offal: 100, tripe: 0 },
+    "Marha lép / vese": { meat: 0, bone: 0, offal: 100, tripe: 0 }
+  };
 
   // ==========================================
   // 2. KIEGÉSZÍTŐK ADATBÁZISA
@@ -650,7 +714,8 @@
       isCompleteMenu: document.getElementById("isCompleteMenu") ? document.getElementById("isCompleteMenu").checked : true,
       sliders: {},
       packSizes: {},
-      meatSelections: {}
+      meatSelections: {},
+      meatComps: {}
     };
     animalIds.forEach(id => {
       let slider = document.getElementById(id);
@@ -666,6 +731,17 @@
       let selEl = document.getElementById("sel_" + index);
       if (selEl) {
         settings.meatSelections[index] = selEl.value;
+      }
+      if (index < 4) {
+        let mEl = document.getElementById("comp_meat_"+index);
+        if (mEl) {
+          settings.meatComps[index] = {
+             meat: mEl.value,
+             bone: document.getElementById("comp_bone_"+index).value,
+             offal: document.getElementById("comp_offal_"+index).value,
+             tripe: document.getElementById("comp_tripe_"+index).value
+          };
+        }
       }
     });
 
@@ -717,6 +793,19 @@
              checkMeatCustom(index, true);
            }
         }
+        if (index < 4) {
+          if (settings.meatComps && settings.meatComps[index]) {
+            let mEl = document.getElementById("comp_meat_"+index);
+            if (mEl) {
+              mEl.value = settings.meatComps[index].meat || 0;
+              document.getElementById("comp_bone_"+index).value = settings.meatComps[index].bone || 0;
+              document.getElementById("comp_offal_"+index).value = settings.meatComps[index].offal || 0;
+              document.getElementById("comp_tripe_"+index).value = settings.meatComps[index].tripe || 0;
+            }
+          } else if (settings.meatSelections && settings.meatSelections[index] !== undefined) {
+            fillMeatComposition(index);
+          }
+        }
       });
     } catch(e) {
       console.error("Error loading settings:", e);
@@ -751,12 +840,21 @@
             <div class="col" style="flex:1.5"><label style="color:var(--accent);">${tr('kgPrice')} (${tr('currency')}/kg)</label><input type="number" id="price_${index}" placeholder="${tr('optional')}" oninput="saveMeatPrice(${index})"></div>
             <div class="col price-highlight" id="pack_price_${index}">0 ${tr('currency')}</div>
           </div>
+          ${index < 4 ? `
+          <div class="input-row" style="margin-top:6px; background: rgba(0,0,0,0.1); padding: 5px; border-radius: 4px; gap: 4px;">
+            <div class="col"><label style="font-size:11px;">🥩 Hús%</label><input type="number" id="comp_meat_${index}" oninput="updateResults()" style="padding:4px; font-size:12px;" value="0" min="0" max="100"></div>
+            <div class="col"><label style="font-size:11px;">🦴 Csont%</label><input type="number" id="comp_bone_${index}" oninput="updateResults()" style="padding:4px; font-size:12px;" value="0" min="0" max="100"></div>
+            <div class="col"><label style="font-size:11px;">🩸 Bels.%</label><input type="number" id="comp_offal_${index}" oninput="updateResults()" style="padding:4px; font-size:12px;" value="0" min="0" max="100"></div>
+            <div class="col"><label style="font-size:11px;">🟢 Egyéb%</label><input type="number" id="comp_tripe_${index}" oninput="updateResults()" style="padding:4px; font-size:12px;" value="0" min="0" max="100"></div>
+          </div>
+          ` : ''}
           <div class="meat-stats" id="res_${index}"></div>
         </div>
       `;
     });
     config.forEach((item, index) => {
       renderMeatSelect(index, item.id, null, true);
+      fillMeatComposition(index);
       loadMeatPrice(index);
     });
 
@@ -1023,8 +1121,8 @@
   // 5. CSÚSZKÁK ÉS HÚS MATEK
   // ==========================================
   function applyProfile() { const profileVal = document.getElementById("dogProfile").value; if(profileVal !== "custom") { document.getElementById("dogPercent").value = profileVal; autoFillGrams(); } }
-  function handleSlider(activeId) { let activeSlider = document.getElementById(activeId); let activeVal = parseInt(activeSlider.value) || 0; let sumOthers = 0; animalIds.forEach(id => { if (id !== activeId) sumOthers += parseInt(document.getElementById(id).value) || 0; }); if (sumOthers + activeVal > 100) activeSlider.value = 100 - sumOthers; document.getElementById("val_" + activeId).innerText = activeSlider.value + "%"; autoFillGrams(); }
-  function handleRostSlider() { document.getElementById("val_p_rost").innerText = document.getElementById("p_rost").value + "%"; autoFillGrams(); }
+  function handleSlider(activeId) { let activeSlider = document.getElementById(activeId); let activeVal = parseInt(activeSlider.value) || 0; let sumOthers = 0; animalIds.forEach(id => { if (id !== activeId) sumOthers += parseInt(document.getElementById(id).value) || 0; }); if (sumOthers + activeVal > 100) activeSlider.value = 100 - sumOthers; let numInput = document.getElementById("num_" + activeId); if(numInput) numInput.value = activeSlider.value; document.getElementById("val_" + activeId).innerText = activeSlider.value + "%"; autoFillGrams(); }
+  function handleRostSlider() { let val = document.getElementById("p_rost").value; document.getElementById("num_p_rost").value = val; document.getElementById("val_p_rost").innerText = val + "%"; autoFillGrams(); }
   
   function handleManualGram(index) {
     const weight = parseFloat(document.getElementById("dogWeight").value) || 0;
@@ -1037,15 +1135,15 @@
       const manualGrams = parseFloat(document.getElementById(`adag_${index}`).value) || 0;
       let calcPercent = Math.round((manualGrams / baseGrams) * 100);
 
-      if ((index === 3 || index === 4) && isComplete && manualGrams > 0) { document.getElementById("isCompleteMenu").checked = false; }
+      if (index === 3 && isComplete && manualGrams > 0) { document.getElementById("isCompleteMenu").checked = false; }
       if (index === 1 && document.getElementById("isCompleteMenu")?.checked) {
-        let p_maj = parseInt(document.getElementById("p_maj").value) || 0; let p_bels = parseInt(document.getElementById("p_bels").value) || 0;
-        let realMenuPercent = calcPercent - p_maj - p_bels; if (realMenuPercent < 0) realMenuPercent = 0;
-        let slider = document.getElementById("p_menu"); if(slider) { slider.value = realMenuPercent; document.getElementById("val_p_menu").innerText = slider.value + "%"; }
-      } else if (index < 5) {
-        let slider = document.getElementById(animalIds[index]); if(slider) { slider.value = calcPercent; document.getElementById("val_" + animalIds[index]).innerText = slider.value + "%"; }
-      } else if (index === 5) {
-        let slider = document.getElementById("p_rost"); if(slider) { slider.value = calcPercent; document.getElementById("val_p_rost").innerText = slider.value + "%"; }
+        let p_maj = parseInt(document.getElementById("p_maj").value) || 0;
+        let realMenuPercent = calcPercent - p_maj; if (realMenuPercent < 0) realMenuPercent = 0;
+        let slider = document.getElementById("p_menu"); if(slider) { slider.value = realMenuPercent; document.getElementById("num_p_menu").value = slider.value; document.getElementById("val_p_menu").innerText = slider.value + "%"; }
+      } else if (index < 4) {
+        let slider = document.getElementById(animalIds[index]); if(slider) { slider.value = calcPercent; document.getElementById("num_" + animalIds[index]).value = slider.value; document.getElementById("val_" + animalIds[index]).innerText = slider.value + "%"; }
+      } else if (index === 4) {
+        let slider = document.getElementById("p_rost"); if(slider) { slider.value = calcPercent; document.getElementById("num_p_rost").value = slider.value; document.getElementById("val_p_rost").innerText = slider.value + "%"; }
       }
     }
     updateResults(); 
@@ -1060,20 +1158,17 @@
     const p_menu = (parseFloat(document.getElementById("p_menu").value) || 0) / 100;
     const p_hus = (parseFloat(document.getElementById("p_hus").value) || 0) / 100;
     const p_maj = (parseFloat(document.getElementById("p_maj").value) || 0) / 100;
-    const p_bels = (parseFloat(document.getElementById("p_bels").value) || 0) / 100;
     const p_rost = (parseFloat(document.getElementById("p_rost").value) || 0) / 100;
 
     const cbMenu = document.getElementById("isCompleteMenu"); const isComplete = cbMenu ? cbMenu.checked : false;
-    const eff_menu = isComplete ? (p_menu + p_maj + p_bels) : p_menu;
+    const eff_menu = isComplete ? (p_menu + p_maj) : p_menu;
     const eff_maj = isComplete ? 0 : p_maj;
-    const eff_bels = isComplete ? 0 : p_bels;
 
     document.getElementById("adag_0").value = Math.round(baseGrams * p_csont);
     document.getElementById("adag_1").value = Math.round(baseGrams * eff_menu);
     document.getElementById("adag_2").value = Math.round(baseGrams * p_hus);
     document.getElementById("adag_3").value = Math.round(baseGrams * eff_maj);
-    document.getElementById("adag_4").value = Math.round(baseGrams * eff_bels);
-    document.getElementById("adag_5").value = Math.round(baseGrams * p_rost);
+    document.getElementById("adag_4").value = Math.round(baseGrams * p_rost);
 
     recalcAutoSupps(); // A kiegészítőket is lefrissítjük a súllyal!
     updateResults();
@@ -1156,13 +1251,47 @@
     textList += `${tr('meats')}:\n`;
     let htmlList = "";
 
+    // BARF Valós Analízis változók
+    let barfSum = { meat: 0, bone: 0, offal: 0, tripe: 0 };
+    let totalAnimalGramsForMacro = 0;
+
     // 1. Húsok kalkulációja
     config.forEach((item, i) => {
       const adag = parseFloat(document.getElementById(`adag_${i}`).value) || 0;
       const kisz = parseFloat(document.getElementById(`kisz_${i}`).value) || 0;
       const pricePerKg = parseFloat(document.getElementById(`price_${i}`)?.value) || 0;
+      const selEl = document.getElementById(`sel_${i}`);
+      const selValue = selEl ? selEl.value : null;
       
-      if (i === 5) totalRost += adag; else totalAllati += adag;
+      if (i === 4) {
+         totalRost += adag;
+      } else {
+         totalAllati += adag;
+         if (adag > 0) {
+            totalAnimalGramsForMacro += adag;
+            let comp = { meat: 0, bone: 0, offal: 0, tripe: 0 };
+            const mEl = document.getElementById("comp_meat_"+i);
+            if (mEl) {
+               comp.meat = parseFloat(mEl.value) || 0;
+               comp.bone = parseFloat(document.getElementById("comp_bone_"+i).value) || 0;
+               comp.offal = parseFloat(document.getElementById("comp_offal_"+i).value) || 0;
+               comp.tripe = parseFloat(document.getElementById("comp_tripe_"+i).value) || 0;
+            } else {
+               if (selValue && meatComposition[selValue]) {
+                  comp = meatComposition[selValue];
+               } else {
+                  if (i === 0) comp = { meat: 40, bone: 60, offal: 0, tripe: 0 };
+                  else if (i === 1) comp = { meat: 80, bone: 0, offal: 20, tripe: 0 };
+                  else if (i === 2) comp = { meat: 100, bone: 0, offal: 0, tripe: 0 };
+                  else if (i === 3) comp = { meat: 0, bone: 0, offal: 100, tripe: 0 };
+               }
+            }
+            barfSum.meat += adag * (comp.meat / 100);
+            barfSum.bone += adag * (comp.bone / 100);
+            barfSum.offal += adag * (comp.offal / 100);
+            barfSum.tripe += adag * (comp.tripe / 100);
+         }
+      }
       let currentPercent = baseGrams > 0 ? ((adag / baseGrams) * 100).toFixed(1) : 0;
       document.getElementById(`perc_${i}`).innerText = currentPercent + "%";
       
@@ -1201,6 +1330,41 @@
     const targetSum = animalIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
     document.getElementById("totalGramsMain").innerText = `${totalAllati} g`;
     document.getElementById("totalGramsSub").innerText = `${tr('totalSub')} ${totalRost} g`;
+
+    const macroDiv = document.getElementById("macroAnalysis");
+    if (totalAnimalGramsForMacro > 0) {
+      const pMeat = (barfSum.meat / totalAnimalGramsForMacro * 100).toFixed(1);
+      const pBone = (barfSum.bone / totalAnimalGramsForMacro * 100).toFixed(1);
+      const pOffal = (barfSum.offal / totalAnimalGramsForMacro * 100).toFixed(1);
+      const pTripe = (barfSum.tripe / totalAnimalGramsForMacro * 100).toFixed(1);
+      
+      let warnHTML = "";
+      if (pMeat > 75) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Sok az izomhús! (Ideális: 60-70%)</div>";
+      if (pMeat < 50) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Kevés az izomhús! (Ideális: 60-70%)</div>";
+      if (pBone > 18) warnHTML += "<div style='color:var(--danger); margin-top:5px;'>⚠️ Túl sok a csont! (Ideális: 10-15%)</div>";
+      if (pBone < 8) warnHTML += "<div style='color:var(--warning); margin-top:5px;'>⚠️ Kevés a csont! (Ideális: 10-15%)</div>";
+      if (pOffal > 18) warnHTML += "<div style='color:var(--danger); margin-top:5px;'>⚠️ Túl sok a belsőség! (Ideális: 10-15%)</div>";
+      
+      macroDiv.innerHTML = `
+        <div style="font-weight:bold; margin-bottom:5px; color: var(--text-color);">BARF Valós Analízis (Csak az állati összetevők alapján)</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+          <span>🥩 Tiszta Izomhús:</span> <b style="color: ${pMeat > 75 || pMeat < 50 ? 'var(--warning)' : 'inherit'}">${pMeat}%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+          <span>🟢 Egyéb (Izomhúsnak számít):</span> <b>${pTripe}%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+          <span>🦴 Tiszta Csont:</span> <b style="color: ${pBone > 18 || pBone < 8 ? 'var(--danger)' : 'inherit'}">${pBone}%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>🩸 Belsőség:</span> <b style="color: ${pOffal > 18 ? 'var(--danger)' : 'inherit'}">${pOffal}%</b>
+        </div>
+        ${warnHTML}
+      `;
+      macroDiv.style.display = "block";
+    } else {
+      macroDiv.style.display = "none";
+    }
 
     const summaryCard = document.getElementById("totalSummaryCard"); const warningText = document.getElementById("warningText");
     if (targetSum !== 100 || (Math.abs(totalAllati - baseGrams) > 2)) { summaryCard.classList.add("error-state"); warningText.style.display = "block"; } 
@@ -1304,12 +1468,37 @@
     }
     checkMeatCustom(index, isInit);
   }
+  function fillMeatComposition(index) {
+    if (index >= 4) return;
+    const selEl = document.getElementById(`sel_${index}`);
+    const selValue = selEl ? selEl.value : null;
+    let comp = { meat: 0, bone: 0, offal: 0, tripe: 0 };
+    if (selValue && meatComposition[selValue]) {
+       comp = meatComposition[selValue];
+    } else {
+       if (index === 0) comp = { meat: 70, bone: 30, offal: 0, tripe: 0 };
+       else if (index === 1) comp = { meat: 80, bone: 0, offal: 20, tripe: 0 };
+       else if (index === 2) comp = { meat: 100, bone: 0, offal: 0, tripe: 0 };
+       else if (index === 3) comp = { meat: 0, bone: 0, offal: 100, tripe: 0 };
+    }
+    const mEl = document.getElementById("comp_meat_"+index);
+    if (mEl) {
+       mEl.value = comp.meat;
+       document.getElementById("comp_bone_"+index).value = comp.bone;
+       document.getElementById("comp_offal_"+index).value = comp.offal;
+       document.getElementById("comp_tripe_"+index).value = comp.tripe;
+    }
+  }
+
   function checkMeatCustom(index, isInit = false) {
     const sel = document.getElementById(`sel_${index}`); const group = document.getElementById(`custom_group_${index}`); const delBtn = document.getElementById(`del_custom_${index}`); const catId = config[index].id; const customOpts = getMeatCustomOptions(catId);
     if(sel.value === "egyeb") { group.style.display = "flex"; document.getElementById(`custom_${index}`).focus(); } else { group.style.display = "none"; }
     if(sel.value && sel.value !== "egyeb") { delBtn.style.display = "inline-block"; } else { delBtn.style.display = "none"; }
     loadMeatPrice(index);
-    if(!isInit) updateResults(); // Azonnali frissítés a bevásárlólistán
+    if(!isInit) {
+       fillMeatComposition(index);
+       updateResults();
+    }
   }
 
   // Megbízhatóbb mentés, amikor az app háttérbe kerül
